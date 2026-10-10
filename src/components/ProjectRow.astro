@@ -1,0 +1,97 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import { url } from '../lib/url';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const { title, tagline, summary, context, cover, coverAlt } = project.data;
+---
+
+<a class="row" href={url(`/projects/${project.id}/`)}>
+  {
+    cover ? (
+      <Image class="thumb" src={cover} alt={coverAlt ?? ''} width={336} height={224} />
+    ) : (
+      <div class="thumb placeholder">Photo</div>
+    )
+  }
+  <div class="text">
+    <div class="title">{title}<span class="tagline">{tagline}</span></div>
+    <div class="summary">{summary}</div>
+  </div>
+  <div class="context">{context}</div>
+</a>
+
+<style>
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 24px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none;
+  }
+
+  .row:hover .title {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  .thumb {
+    flex: 0 0 168px;
+    width: 168px;
+    height: 112px;
+    object-fit: cover;
+    border: 1px solid var(--rule);
+  }
+
+  .placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--fill);
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .text {
+    flex: 999 1 360px;
+    min-width: 0;
+  }
+
+  .title {
+    font-size: 21px;
+    font-weight: 600;
+  }
+
+  .tagline {
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .tagline::before {
+    content: ' – ';
+  }
+
+  .row:hover .tagline {
+    color: var(--muted);
+  }
+
+  .summary {
+    margin-top: 4px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--body);
+  }
+
+  .context {
+    flex: 1 1 160px;
+    font-size: 15px;
+    color: var(--muted);
+  }
+</style>

@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ProjectRow from '../../components/ProjectRow.astro';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base title="Projects" description="Robots, boards and firmware John Peng has built." current="projects">
+  <section class="section page">
+    <h1>Projects</h1>
+    <p class="lede">Things I've built at work, in clubs, at hackathons, and on my own.</p>
+    <div class="rows">
+      {projects.map((project) => <ProjectRow project={project} />)}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .page {
+    padding-top: 64px;
+  }
+
+  h1 {
+    margin: 0 0 20px;
+    font-size: clamp(40px, 6vw, 52px);
+    letter-spacing: -0.02em;
+  }
+
+  .rows {
+    border-top: 1.5px solid var(--ink);
+  }
+</style>

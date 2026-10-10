@@ -1,0 +1,300 @@
+---
+import Base from '../layouts/Base.astro';
+import Photo from '../components/Photo.astro';
+import coveWithTeammate from '../assets/projects/cove/me-and-teammate.jpg';
+import coveTeam from '../assets/projects/cove/team-with-arm.jpg';
+import skatemoTeam from '../assets/projects/skatemo/team.jpg';
+import robohacks from '../assets/me/robohacks-yc.jpg';
+import { myPhoto } from '../lib/photos';
+import { url } from '../lib/url';
+
+const layers = [
+  {
+    name: 'Perception and planning',
+    tools: 'OpenCV, YOLO, AprilTags, MoveIt 2.',
+    used: [
+      ['SkateMo', 'skatemo'],
+      ['Scrambler', 'scrambler'],
+      ['Cove', 'cove'],
+    ],
+    link: '/target_joints',
+  },
+  {
+    name: 'Robot software',
+    tools: 'ROS 2, Python, C++, URDF.',
+    used: [
+      ['Cove', 'cove'],
+      ['Tether', 'tether'],
+    ],
+    link: 'CAN, UART, BLE, ESP-NOW',
+  },
+  {
+    name: 'Firmware',
+    tools: 'Embedded C on nRF52840, ESP32 and AVR: interrupts, timers, PWM.',
+    used: [
+      ['SRAM', 'sram'],
+      ['Karate Kid', 'karate-kid'],
+    ],
+    link: 'GPIO, relays, MOSFET drivers',
+  },
+  {
+    name: 'Hardware',
+    tools: 'Altium, KiCad, PCB assembly, power and battery design.',
+    used: [
+      ['SRAM', 'sram'],
+      ['Karate Kid', 'karate-kid'],
+      ['Tether', 'tether'],
+    ],
+  },
+];
+
+const timeline = [
+  ['2026', 'Interned at SRAM in Chicago. Built Cove at Terra Labs, then started leading its successor, Tether. Built ID0, a robot that designs and prints its own tools, at YC\'s RoboHacks. Placed second at the Himalaya Robotics Hack with Scrambler.'],
+  ['2025', 'ML internship at Manycore Tech in Hangzhou. Designed the PCB for the Karate Kid wearable, started leading SkateMo, and won Best Hardware at an LA TechWeek buildathon with Vyz.'],
+  ['2024', 'IoT internship at MFE Education in Shanghai. Started at USC and joined the RoboLAND lab.'],
+  ['2023', 'Three awards at Regeneron ISEF for the modular robots, including First Award in Embedded Systems. Represented ISEF at the EU Contest for Young Scientists and won a top award.'],
+  ['2021', 'Started building my own robots and mechanisms.'],
+];
+
+const listWords = (items: string[][]) =>
+  items.map(([label, slug], i) => {
+    const sep = i === 0 ? '' : i === items.length - 1 ? (items.length > 2 ? ', and ' : ' and ') : ', ';
+    return { sep, label, href: url(`/projects/${slug}/`) };
+  });
+---
+
+<Base title="About" description="Who John Peng is and how he got into building robots." current="about">
+  <section class="intro">
+    <div class="intro-text">
+      <h1>About me</h1>
+      <p>
+        I'm John Peng, an electrical and computer engineering student at USC.
+      </p>
+      <p>
+        I got into engineering by building things on my own. Before college I spent three years on independent projects,
+        including a <a href={url('/projects/braille-embosser/')}>camshaft braille embosser</a> and a set of
+        <a href={url('/projects/modular-robots/')}>modular robots</a> that find and attach to each other. The modular
+        robots won First Award in Embedded Systems at ISEF in 2023 and took me to the EU Contest for Young Scientists.
+      </p>
+      <p>
+        At USC I've mostly worked on robots: legged locomotion research in the RoboLAND lab, a self-driving skateboard
+        and a motion-tracking wearable with USC Makers, and a robot arm and an inchworm robot at Terra Labs. I've spent my summers on the
+        industry side, building an LLM retrieval pipeline at Manycore Tech and wireless hardware at SRAM.
+      </p>
+      <p>
+        The part I enjoy most is integration, when the board, the firmware and the software finally run together. I also
+        like writing things down. On Tether I keep a decision log so the project doesn't live only in the project
+        managers' heads.
+      </p>
+    </div>
+    <div class="intro-photo">
+      <Photo
+        src={myPhoto('casual')}
+        alt="John at SRAM's Chicago office"
+        placeholder="A second, more casual photo"
+        caption="At SRAM's Chicago office, summer 2026"
+        ratio="4 / 5"
+        person
+        eager
+      />
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Some photos</h2>
+    <div class="photos">
+      <Photo src={coveWithTeammate} alt="John taking a selfie while a teammate works on Cove's electronics" caption="Working on Cove with a teammate" />
+      <Photo src={coveTeam} alt="Three members of the Cove team working on the arm" caption="The Cove team with the arm, spring 2026" />
+      <Photo src={skatemoTeam} alt="The SkateMo team holding the skateboard" caption="The SkateMo team at USC Makers" />
+      <Photo src={robohacks} alt="John's team standing next to a Y Combinator sign" caption="Our ID0 team at RoboHacks, outside Y Combinator" />
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>What I work on</h2>
+    <p class="lede">Most robots I've worked on break down into the same four layers. These are the tools I use at each one, and where.</p>
+    <figure class="stack grid-paper">
+      {
+        layers.map((layer, i) => (
+          <>
+            <div class="layer">
+              <div class:list={['box', { solid: i === layers.length - 1 }]}>{layer.name}</div>
+              <p>
+                {layer.tools} Used on{' '}
+                {listWords(layer.used).map((w) => (
+                  <>
+                    {w.sep}
+                    <a href={w.href}>{w.label}</a>
+                  </>
+                ))}
+                .
+              </p>
+            </div>
+            {layer.link && (
+              <div class="link">
+                <span class="wire" />
+                <code>{layer.link}</code>
+              </div>
+            )}
+          </>
+        ))
+      }
+    </figure>
+  </section>
+
+  <section class="section">
+    <h2>How I got here</h2>
+    <div class="timeline">
+      {
+        timeline.map(([year, text]) => (
+          <div>
+            <span class="year">{year}</span>
+            <span>{text}</span>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Outside of engineering</h2>
+    <p class="big">
+      In my first year I was programming chair for my residence council. We got the In-N-Out truck to come to Parkside
+      and put on Parkchella, an end-of-year party for 650+ residents.
+      Away from the workbench I love nature, photography and cooking, and on weekends I try to get outdoors. I speak
+      English and Mandarin.
+    </p>
+  </section>
+</Base>
+
+<style>
+  .intro {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 56px;
+    padding: 64px 0 80px;
+  }
+
+  .intro-text {
+    flex: 999 1 480px;
+    min-width: 0;
+    max-width: 680px;
+    font-size: 19px;
+    line-height: 1.65;
+  }
+
+  .intro-text p {
+    margin: 0 0 18px;
+  }
+
+  h1 {
+    margin: 0 0 28px;
+    font-size: clamp(40px, 6vw, 52px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  .intro-photo {
+    flex: 1 1 300px;
+    max-width: 440px;
+  }
+
+  .photos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+    gap: 20px;
+  }
+
+  .stack {
+    margin: 0;
+    padding: 32px;
+    border: 1px solid var(--ink);
+  }
+
+  .layer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 24px;
+  }
+
+  .box {
+    flex: 0 1 260px;
+    padding: 16px 18px;
+    border: 1.5px solid var(--ink);
+    background: var(--bg);
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  .box.solid {
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  .layer p {
+    flex: 999 1 360px;
+    min-width: 0;
+    margin: 0;
+    padding: 4px 0;
+    background: var(--bg);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 44px;
+    padding-left: 40px;
+  }
+
+  .wire {
+    width: 1.5px;
+    height: 100%;
+    background: var(--accent);
+  }
+
+  .link code {
+    padding: 0 4px;
+    background: var(--bg);
+    color: var(--accent);
+    font-size: 13px;
+  }
+
+  .timeline {
+    border-top: 1.5px solid var(--ink);
+  }
+
+  .timeline div {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 24px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 17px;
+    line-height: 1.55;
+  }
+
+  .year {
+    font-weight: 600;
+  }
+
+  @media (max-width: 640px) {
+    .intro {
+      gap: 32px;
+      padding: 40px 0 56px;
+    }
+
+    .stack {
+      padding: 20px 16px;
+    }
+
+    .timeline div {
+      grid-template-columns: 56px minmax(0, 1fr);
+      gap: 16px;
+    }
+  }
+</style>

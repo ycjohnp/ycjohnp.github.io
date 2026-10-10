@@ -1,0 +1,170 @@
+---
+// An image with numbered callout balloons and a matching parts list,
+// like the balloons on an engineering drawing.
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
+interface Callout {
+  /** Where the leader line points, as % of the image width/height. */
+  x: number;
+  y: number;
+  /** Which side of the point the balloon sits on. */
+  side?: 'left' | 'right';
+  text: string;
+}
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  callouts: Callout[];
+}
+
+const { src, alt, callouts } = Astro.props;
+---
+
+<div class="callout-figure">
+  <figure class="drawing grid-paper">
+    <Image src={src} alt={alt} widths={[640, 960]} sizes="(max-width: 900px) 100vw, 720px" />
+    {
+      callouts.map((c, i) => (
+        <span class:list={['balloon', c.side ?? 'right']} style={`left: ${c.x}%; top: ${c.y}%`} aria-hidden="true">
+          <span class="dot" />
+          <span class="leader" />
+          <span class="num">{i + 1}</span>
+        </span>
+      ))
+    }
+  </figure>
+  <div class="side">
+    <slot />
+    <ol class="parts">
+      {
+        callouts.map((c, i) => (
+          <li>
+            <span class="num-text">{i + 1}</span>
+            <span set:html={c.text} />
+          </li>
+        ))
+      }
+    </ol>
+    <slot name="after" />
+  </div>
+</div>
+
+<style>
+  .callout-figure {
+    display: flex;
+    flex-wrap: wrap;
+    border: 1px solid var(--ink);
+  }
+
+  .drawing {
+    position: relative;
+    flex: 999 1 560px;
+    min-width: 0;
+    margin: 0;
+    border-right: 1px solid var(--ink);
+  }
+
+  .drawing img {
+    width: 100%;
+    mix-blend-mode: multiply;
+  }
+
+  .balloon {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    transform: translateY(-50%);
+  }
+
+  .balloon.left {
+    flex-direction: row-reverse;
+    transform: translate(-100%, -50%);
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .leader {
+    width: 44px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1.5px solid var(--accent);
+    border-radius: 50%;
+    background: var(--bg);
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .side {
+    flex: 1 1 340px;
+    min-width: 0;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .side :global(p) {
+    margin: 0;
+  }
+
+  .parts {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--ink);
+  }
+
+  .parts li {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .num-text {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  @media (max-width: 900px) {
+    .drawing {
+      border-right: none;
+      border-bottom: 1px solid var(--ink);
+    }
+  }
+
+  @media (max-width: 520px) {
+    .leader {
+      width: 20px;
+    }
+
+    .num {
+      width: 24px;
+      height: 24px;
+      font-size: 12px;
+    }
+
+    .side {
+      padding: 20px 16px;
+    }
+  }
+</style>

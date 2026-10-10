@@ -1,0 +1,59 @@
+---
+import { existsSync } from 'node:fs';
+import { url } from '../lib/url';
+
+interface Props {
+  current?: 'projects' | 'about';
+}
+
+const { current } = Astro.props;
+// The Resume link appears once public/resume.pdf exists.
+const hasResume = existsSync('public/resume.pdf');
+---
+
+<header class="site-header">
+  <a class="name" href={url('/')}>John Peng</a>
+  <nav aria-label="Main">
+    <a href={url('/projects/')} aria-current={current === 'projects' ? 'page' : undefined}>Projects</a>
+    <a href={url('/about/')} aria-current={current === 'about' ? 'page' : undefined}>About</a>
+    {hasResume && <a href={url('/resume.pdf')}>Resume</a>}
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .name {
+    font-weight: 600;
+    font-size: 19px;
+    text-decoration: none;
+  }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-right: -12px;
+  }
+
+  nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 12px;
+    text-decoration: none;
+  }
+
+  nav a[aria-current='page'] {
+    text-decoration: underline;
+  }
+</style>

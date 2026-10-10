@@ -1,0 +1,162 @@
+{
+  "_generated": "By scripts/sync-profile.mjs from a2j/profile. Edit a2j, then run `npm run sync`.",
+  "name": "John Peng",
+  "email": "johnpeng@usc.edu",
+  "location": "Los Angeles, CA",
+  "links": {
+    "github": "https://github.com/ycjohnp",
+    "linkedin": "https://linkedin.com/in/yc-john-peng"
+  },
+  "education": [
+    {
+      "id": "usc-bs-ece",
+      "institution": "University of Southern California",
+      "degree": "Bachelor of Science",
+      "field": "Electrical and Computer Engineering",
+      "start": "2024-08",
+      "end": "2028-05"
+    }
+  ],
+  "experience": [
+    {
+      "id": "terra-tether-pm-2026",
+      "company": "Terra Labs",
+      "title": "Hardware Project Manager and Co-Project Manager",
+      "project": "Tether",
+      "location": "Los Angeles, CA",
+      "start": "2026-09",
+      "end": "present"
+    },
+    {
+      "id": "sram-adv-dev-2026",
+      "company": "SRAM",
+      "title": "Advanced Development Engineering Intern",
+      "project": null,
+      "location": "Chicago, IL",
+      "start": "2026-06",
+      "end": "2026-08"
+    },
+    {
+      "id": "makers-director-2026",
+      "company": "USC Makers",
+      "title": "Director of Technical Resources",
+      "project": null,
+      "location": "Los Angeles, CA",
+      "start": "2026-05",
+      "end": "present"
+    },
+    {
+      "id": "terra-cove-2026",
+      "company": "Terra Labs",
+      "title": "Software and Electrical Engineer",
+      "project": "Cove",
+      "location": "Los Angeles, CA",
+      "start": "2026-02",
+      "end": "2026-05"
+    },
+    {
+      "id": "makers-skatemo-2025",
+      "company": "USC Makers",
+      "title": "Technical Project Lead / Project Manager",
+      "project": "SkateMo Autonomous Skateboard",
+      "location": "Los Angeles, CA",
+      "start": "2025-08",
+      "end": "2026-05"
+    },
+    {
+      "id": "manycore-ml-2025",
+      "company": "Manycore Tech",
+      "title": "Machine Learning Engineer Intern, LLM/RAG",
+      "project": null,
+      "location": "Hangzhou, China",
+      "start": "2025-05",
+      "end": "2025-07"
+    },
+    {
+      "id": "makers-karate-kid-2025",
+      "company": "USC Makers",
+      "title": "Embedded Systems Engineer / Wireless Systems Lead",
+      "project": "Karate Kid",
+      "location": "Los Angeles, CA",
+      "start": "2025-02",
+      "end": "2025-05"
+    },
+    {
+      "id": "usc-arc-2025",
+      "company": "USC Advanced Robotic Combat",
+      "title": "Engineer",
+      "project": null,
+      "location": "Los Angeles, CA",
+      "start": "2025-01",
+      "end": "2025-05"
+    },
+    {
+      "id": "rha-chair-2024",
+      "company": "USC Residential Housing Association",
+      "title": "Community Council Programming Chair",
+      "project": null,
+      "location": "Los Angeles, CA",
+      "start": "2024-09",
+      "end": "2025-05"
+    },
+    {
+      "id": "roboland-2024",
+      "company": "Robot Locomotion and Navigation Dynamics Laboratory (RoboLAND), USC",
+      "title": "Undergraduate Researcher",
+      "project": null,
+      "location": "Los Angeles, CA",
+      "start": "2024-08",
+      "end": "present"
+    },
+    {
+      "id": "mfe-iot-2024",
+      "company": "MFE Education",
+      "title": "IoT Systems Intern",
+      "project": null,
+      "location": "Shanghai, China",
+      "start": "2024-06",
+      "end": "2024-07"
+    },
+    {
+      "id": "independent-research-2021",
+      "company": "Self-employed",
+      "title": "Independent College-Level Researcher",
+      "project": null,
+      "location": null,
+      "start": "2021-05",
+      "end": "2024-07"
+    }
+  ],
+  "awards": [
+    {
+      "name": "Hardware Project Winner",
+      "issuer": "LA TechWeek \"Good Vibes Only!\" AI/ML Buildathon",
+      "date": "2025-10"
+    },
+    {
+      "name": "First Award in Embedded Systems",
+      "issuer": "Regeneron International Science and Engineering Fair (ISEF)",
+      "date": "2023-05"
+    },
+    {
+      "name": "EU Contest for Young Scientists Award",
+      "issuer": "Regeneron International Science and Engineering Fair (ISEF)",
+      "date": "2023-05"
+    },
+    {
+      "name": "SAE International Best Projects Special Award",
+      "issuer": "Regeneron International Science and Engineering Fair (ISEF)",
+      "date": "2023-05"
+    },
+    {
+      "name": "Innovation Summit Finalist",
+      "issuer": "Conrad Challenge",
+      "date": 2023
+    },
+    {
+      "name": "Top 25% Scorer",
+      "issuer": "CEMC Cayley Contest",
+      "date": null
+    }
+  ]
+}

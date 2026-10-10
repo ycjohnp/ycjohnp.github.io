@@ -1,0 +1,40 @@
+---
+import { profile } from '../data/site';
+
+// Written out as "johnpeng {at} usc [dot] edu" and not linked, so scrapers can't pick it up.
+const [user, domain] = profile.email.split('@');
+const email = `${user} {at} ${domain.replaceAll('.', ' [dot] ')}`;
+---
+
+<footer id="contact" class="site-footer">
+  <h2>Say hello</h2>
+  <p class="big">
+    Email is the best way to reach me: {email}.{' '}
+    I'm also on <a href={profile.links.github}>GitHub</a> and <a href={profile.links.linkedin}>LinkedIn</a>.
+  </p>
+  <p class="copyright">© {new Date().getFullYear()} John Peng</p>
+</footer>
+
+<style>
+  .site-footer {
+    padding-top: 40px;
+    border-top: 1px solid var(--ink);
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 32px;
+  }
+
+  .big {
+    margin: 14px 0 0;
+  }
+
+  .copyright {
+    margin: 72px 0 0;
+    padding: 20px 0 40px;
+    border-top: 1px solid var(--rule);
+    font-size: 14px;
+    color: var(--muted);
+  }
+</style>

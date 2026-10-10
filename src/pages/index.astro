@@ -1,0 +1,214 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Photo from '../components/Photo.astro';
+import CalloutFigure from '../components/CalloutFigure.astro';
+import ProjectRow from '../components/ProjectRow.astro';
+import coveCad from '../assets/projects/cove/cad.jpg';
+import { degree, experience, profile } from '../data/site';
+import { dateRange, monthYear } from '../lib/dates';
+import { myPhoto } from '../lib/photos';
+import { url } from '../lib/url';
+
+const featured = (await getCollection('projects', (p) => p.data.featured)).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base>
+  <section class="intro">
+    <div class="portrait">
+      <Photo
+        src={myPhoto('portrait')}
+        alt="Portrait of John Peng"
+        placeholder="Your portrait goes here"
+        ratio="4 / 5"
+        person
+        eager
+      />
+    </div>
+    <div class="intro-text">
+      <h1>Hi, I'm John.</h1>
+      <p class="big">
+        I study electrical and computer engineering at USC, and I build robots. Most of my work sits where hardware and
+        software meet: designing the board, writing the firmware, getting the motors to talk to ROS, and working out why
+        something that ran fine yesterday doesn't today.
+      </p>
+      <p class="big">
+        Right now I'm co-leading <a href={url('/projects/tether/')}>Tether</a> at Terra Labs, a 7-DOF inchworm robot made of
+        three wireless modules. This past summer I interned on SRAM's Advanced Development team in Chicago.
+      </p>
+      <dl class="facts">
+        <div>
+          <dt>Studying</dt>
+          <dd>B.S. {degree.field}, USC. Graduating {monthYear(degree.end)}.</dd>
+        </div>
+        <div>
+          <dt>Based in</dt>
+          <dd>{profile.location.replace(', CA', '')}</dd>
+        </div>
+        <div>
+          <dt>Looking for</dt>
+          <dd>A Summer 2027 internship in robotics, embedded systems or hardware</dd>
+        </div>
+        <div>
+          <dt>Elsewhere</dt>
+          <dd><a href={profile.links.github}>GitHub</a>, <a href={profile.links.linkedin}>LinkedIn</a></dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Latest build: Cove<span class="tagline">7-DOF robotic arm</span></h2>
+      <a href={url('/projects/cove/')}>Read how it works</a>
+    </div>
+    <CalloutFigure
+      src={coveCad}
+      alt="CAD render of the Cove 7-DOF robotic arm"
+      callouts={[
+        { x: 64, y: 10, text: 'End effector at the wrist flange' },
+        { x: 79, y: 31, text: 'Damiao BLDC actuator, one of seven, torque-controlled over CAN' },
+        { x: 67, y: 53, text: 'Aluminum brackets: eight parts milled from $308 of stock' },
+        { x: 26, y: 82, side: 'left', text: 'Base mount, where the threads once stripped under load and took out four actuators' },
+      ]}
+    >
+      <p>
+        A 7-DOF arm that a student team at Terra Labs built from scratch in 10 weeks. I designed the control
+        architecture and did the hardware/software integration.
+      </p>
+      <p slot="after" class="note">
+        It runs ROS 2 on a Raspberry Pi 5, with an e-stop that cuts torque if the heartbeat stops. About 50 Nm of torque
+        and 7 kg of payload at full reach. Shown to 200+ people at Demo Day.
+      </p>
+    </CalloutFigure>
+  </section>
+
+  <section class="section">
+    <h2>Projects</h2>
+    <p class="lede">Things I've built at work, in clubs, at hackathons, and on my own.</p>
+    <div class="rows">
+      {featured.map((project) => <ProjectRow project={project} />)}
+    </div>
+    <p><a href={url('/projects/')}>See all projects</a></p>
+  </section>
+
+  <section class="section">
+    <h2>Where I've worked</h2>
+    <div class="table-scroll">
+      <table class="work">
+        <thead>
+          <tr><th scope="col">Where</th><th scope="col">Role</th><th scope="col">When</th></tr>
+        </thead>
+        <tbody>
+          {
+            experience.map((x) => (
+              <tr>
+                <td class="org">{x.org}</td>
+                <td>{x.role}</td>
+                <td class="when">{dateRange(x.start, x.end)}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .intro {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 56px;
+    padding: 64px 0 72px;
+  }
+
+  .portrait {
+    flex: 1 1 300px;
+    max-width: 420px;
+  }
+
+  .intro-text {
+    flex: 999 1 460px;
+    min-width: 0;
+    padding-top: 8px;
+  }
+
+  h1 {
+    margin: 0 0 28px;
+    font-size: clamp(40px, 6vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  .intro-text .big {
+    margin: 0 0 18px;
+  }
+
+  .facts {
+    margin-top: 36px;
+    max-width: 640px;
+  }
+
+  h2 .tagline {
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  h2 .tagline::before {
+    content: ' – ';
+  }
+
+  .note {
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .rows {
+    border-top: 1.5px solid var(--ink);
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+  }
+
+  .work {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+    font-size: 16px;
+  }
+
+  .work th {
+    text-align: left;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--muted);
+    padding: 0 16px 10px 0;
+    border-bottom: 1.5px solid var(--ink);
+  }
+
+  .work td {
+    padding: 14px 16px 14px 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    line-height: 1.45;
+  }
+
+  .org {
+    font-weight: 600;
+  }
+
+  .when {
+    white-space: nowrap;
+    color: var(--body);
+  }
+
+  @media (max-width: 640px) {
+    .intro {
+      gap: 32px;
+      padding: 40px 0 56px;
+    }
+  }
+</style>
