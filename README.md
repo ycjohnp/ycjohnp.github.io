@@ -65,7 +65,8 @@ Create `src/content/projects/<slug>.md`. The frontmatter fields are defined in
 ## Deploying
 
 Every push to `main` builds and publishes the site to GitHub Pages through
-`.github/workflows/deploy.yml`. It lives at https://ycjohnp.github.io/website/.
+`.github/workflows/deploy.yml`. It lives at https://ycjohnp.github.io/. GitHub serves a site at the
+root of that domain only from a repo named `ycjohnp.github.io`, so keep that name.
 
 One-time setup: in the repo on GitHub, go to Settings → Pages and set **Source** to
 **GitHub Actions**.
@@ -73,11 +74,11 @@ One-time setup: in the repo on GitHub, go to Settings → Pages and set **Source
 To check the production build locally before pushing:
 
 ```bash
-npm run build && npm run preview   # http://localhost:4321/website/
+npm run build && npm run preview   # http://localhost:4321/
 ```
 
 ### Custom domain (optional)
 
 1. Add the domain under Settings → Pages → Custom domain, and point its DNS at GitHub.
 2. Add a `public/CNAME` file containing the domain.
-3. In `astro.config.mjs`, set `site` to `https://<domain>` and delete the `base` line.
+3. In `astro.config.mjs`, set `site` to `https://<domain>`.
