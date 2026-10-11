@@ -18,8 +18,43 @@ const hasResume = existsSync('public/resume.pdf');
     <a href={url('/about/')} aria-current={current === 'about' ? 'page' : undefined}>About</a>
     {hasResume && <a href={url('/resume.pdf')}>Resume</a>}
     <a href="#contact">Contact</a>
+    <button class="theme" type="button" aria-label="Switch to dark mode">
+      <!-- The center of mass symbol from engineering drawings. -->
+      <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+        <circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.5" />
+        <path d="M10 10V2.5A7.5 7.5 0 0 1 17.5 10ZM10 10V17.5A7.5 7.5 0 0 1 2.5 10Z" fill="currentColor" />
+      </svg>
+    </button>
   </nav>
 </header>
+
+<script>
+  // The theme toggle. With no saved choice the site follows the system setting (see global.css). Clicking
+  // switches to the other theme and saves it, unless that's what the system wants anyway, in which case the
+  // choice is cleared so the site goes back to following the system.
+  const root = document.documentElement;
+  const button = document.querySelector<HTMLButtonElement>('.site-header .theme')!;
+  const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+  const current = () => root.dataset.theme ?? (systemDark.matches ? 'dark' : 'light');
+
+  function label() {
+    button.setAttribute('aria-label', current() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+
+  button.addEventListener('click', () => {
+    const next = current() === 'dark' ? 'light' : 'dark';
+    const system = systemDark.matches ? 'dark' : 'light';
+    try {
+      if (next === system) localStorage.removeItem('theme');
+      else localStorage.setItem('theme', next);
+    } catch {}
+    if (next === system) delete root.dataset.theme;
+    else root.dataset.theme = next;
+    label();
+  });
+  systemDark.addEventListener('change', label);
+  label();
+</script>
 
 <style>
   .site-header {
@@ -55,5 +90,27 @@ const hasResume = existsSync('public/resume.pdf');
 
   nav a[aria-current='page'] {
     text-decoration: underline;
+  }
+
+  /* Only works with scripts, so it only shows with them. */
+  .theme {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  :global(.js) .theme {
+    display: inline-flex;
+  }
+
+  .theme:hover {
+    color: var(--accent);
   }
 </style>

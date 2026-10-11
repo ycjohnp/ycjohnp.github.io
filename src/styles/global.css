@@ -7,10 +7,51 @@
   --fill: #f1f3f5;
   --grid: #eef0f3;
   --accent: #2347c8;
+  /* How the background drawings and photos sit on the page; dark mode changes these. */
+  --sketch-filter: none;
+  --sketch-opacity: 0.08;
+  --photo-filter: none;
+  color-scheme: light;
 
   --sans: 'IBM Plex Sans', system-ui, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
   --max: 1160px;
+}
+
+/* Dark mode: when the visitor's system is dark and they haven't picked light with the header toggle, or when
+   they've picked dark. Base.astro sets data-theme from the saved choice. Keep the two blocks the same. The
+   drawings are dark lines in <img>s, so they're inverted to light lines, and a touch fainter, since light on
+   dark reads stronger. Photos are dimmed slightly so they don't glare. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #121417;
+    --ink: #e9ebee;
+    --body: #c3c7cd;
+    --muted: #949aa3;
+    --rule: #2d3137;
+    --fill: #1b1e22;
+    --grid: #1a1d21;
+    --accent: #86a2ff;
+    --sketch-filter: invert(1);
+    --sketch-opacity: 0.065;
+    --photo-filter: brightness(0.9);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #121417;
+  --ink: #e9ebee;
+  --body: #c3c7cd;
+  --muted: #949aa3;
+  --rule: #2d3137;
+  --fill: #1b1e22;
+  --grid: #1a1d21;
+  --accent: #86a2ff;
+  --sketch-filter: invert(1);
+  --sketch-opacity: 0.065;
+  --photo-filter: brightness(0.9);
+  color-scheme: dark;
 }
 
 *,
@@ -36,6 +77,11 @@ img {
   display: block;
   max-width: 100%;
   height: auto;
+}
+
+main img:not(.sketch),
+main video {
+  filter: var(--photo-filter);
 }
 
 a {
@@ -181,7 +227,8 @@ main > * {
   z-index: -1;
   width: var(--w);
   max-width: none;
-  opacity: 0.08;
+  opacity: var(--sketch-opacity);
+  filter: var(--sketch-filter);
   pointer-events: none;
   user-select: none;
 }
