@@ -19,10 +19,13 @@ const hasResume = existsSync('public/resume.pdf');
     {hasResume && <a href={url('/resume.pdf')}>Resume</a>}
     <a href="#contact">Contact</a>
     <button class="theme" type="button" aria-label="Switch to dark mode">
-      <!-- The center of mass symbol from engineering drawings. -->
-      <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
-        <circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.5" />
-        <path d="M10 10V2.5A7.5 7.5 0 0 1 17.5 10ZM10 10V17.5A7.5 7.5 0 0 1 2.5 10Z" fill="currentColor" />
+      <!-- A moon in light mode (click for dark) and a sun in dark mode (click for light). -->
+      <svg class="moon" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+        <path d="M16.6 11.6A6.8 6.8 0 1 1 8.4 3.4 6.4 6.4 0 0 0 16.6 11.6Z" />
+      </svg>
+      <svg class="sun" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+        <circle cx="10" cy="10" r="3.6" />
+        <path d="M16.0 10.0L18.3 10.0M14.2 14.2L15.9 15.9M10.0 16.0L10.0 18.3M5.8 14.2L4.1 15.9M4.0 10.0L1.7 10.0M5.8 5.8L4.1 4.1M10.0 4.0L10.0 1.7M14.2 5.8L15.9 4.1" />
       </svg>
     </button>
   </nav>
@@ -112,5 +115,36 @@ const hasResume = existsSync('public/resume.pdf');
 
   .theme:hover {
     color: var(--accent);
+  }
+
+  .theme svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Which icon shows follows the same rules as the dark colors in global.css. */
+  .sun {
+    display: none;
+  }
+
+  :global(:root[data-theme='dark']) .sun {
+    display: block;
+  }
+
+  :global(:root[data-theme='dark']) .moon {
+    display: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .sun {
+      display: block;
+    }
+
+    :global(:root:not([data-theme='light'])) .moon {
+      display: none;
+    }
   }
 </style>
