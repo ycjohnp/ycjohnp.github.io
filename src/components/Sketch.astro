@@ -1,0 +1,33 @@
+---
+// A faint line drawing behind the page content, traced from a project photo or CAD file
+// (the SVGs in src/assets/drawings/). Place it inside a section; it's positioned against
+// that section, sits behind everything in it, and is wiped in once when scrolled to.
+// See .sketch in global.css.
+const files = import.meta.glob<string>('../assets/drawings/*.svg', { query: '?url', import: 'default', eager: true });
+
+const drawings = Object.fromEntries(
+  Object.entries(files).map(([path, src]) => [path.split('/').pop()!.replace('.svg', ''), src]),
+);
+
+interface Props {
+  /** File name in src/assets/drawings/, without .svg. */
+  name: string;
+  /** Width in px on desktop. Phones get 60% of this. */
+  width: number;
+  /** Distance from the top of the section, e.g. "-40px" or "35%". */
+  top: string;
+  /** Distance from the section's left or right edge. Negative values bleed past the column. */
+  left?: string;
+  right?: string;
+}
+
+const { name, width, top, left, right } = Astro.props;
+const src = drawings[name];
+if (!src) throw new Error(`Sketch: no drawing named "${name}" in src/assets/drawings/`);
+
+const style = [`--w: ${width}px`, `top: ${top}`, left && `left: ${left}`, right && `right: ${right}`]
+  .filter(Boolean)
+  .join('; ');
+---
+
+<img class="sketch" src={src} alt="" aria-hidden="true" loading="lazy" decoding="async" style={style} />

@@ -29,6 +29,7 @@ facts:
 links:
   - label: Code on GitHub
     href: https://github.com/ycjohnp/cove_motion_moveit2
+sketches: [cove, gripper, arm-schematic]
 ---
 
 Cove was built to grab a wine bottle and pour it. The end effector cradles the bottle, and the rest of the arm is seven BLDC actuators joined by milled aluminum brackets.

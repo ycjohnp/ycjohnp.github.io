@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Photo from '../components/Photo.astro';
+import Sketch from '../components/Sketch.astro';
 import coveWithTeammate from '../assets/projects/cove/me-and-teammate.jpg';
 import coveTeam from '../assets/projects/cove/team-with-arm.jpg';
 import skatemoTeam from '../assets/projects/skatemo/team.jpg';
@@ -65,6 +66,7 @@ const listWords = (items: string[][]) =>
 
 <Base title="About" description="Who John Peng is and how he got into building robots." current="about">
   <section class="intro">
+    <Sketch name="linkage" width={560} top="34%" left="-250px" />
     <div class="intro-text">
       <h1>About me</h1>
       <p>
@@ -72,7 +74,7 @@ const listWords = (items: string[][]) =>
       </p>
       <p>
         I got into engineering by building things on my own. Before college I spent three years on independent projects,
-        including a <a href={url('/projects/braille-embosser/')}>camshaft braille embosser</a> and a set of
+        including a <a href={url('/projects/braille-embosser/')}>camshaft braille embosser</a> and a set of{' '}
         <a href={url('/projects/modular-robots/')}>modular robots</a> that find and attach to each other. The modular
         robots won First Award in Embedded Systems at ISEF in 2023 and took me to the EU Contest for Young Scientists.
       </p>
@@ -102,6 +104,7 @@ const listWords = (items: string[][]) =>
 
   <section class="section">
     <h2>Some photos</h2>
+    <Sketch name="center-frame" width={560} top="-120px" right="-230px" />
     <div class="photos">
       <Photo src={coveWithTeammate} alt="John taking a selfie while a teammate works on Cove's electronics" caption="Working on Cove with a teammate" />
       <Photo src={coveTeam} alt="Three members of the Cove team working on the arm" caption="The Cove team with the arm, spring 2026" />
@@ -112,6 +115,7 @@ const listWords = (items: string[][]) =>
 
   <section class="section">
     <h2>What I work on</h2>
+    <Sketch name="pcb-front" width={440} top="-60px" left="-220px" />
     <p class="lede">Most robots I've worked on break down into the same four layers. These are the tools I use at each one, and where.</p>
     <figure class="stack grid-paper">
       {
@@ -144,6 +148,8 @@ const listWords = (items: string[][]) =>
 
   <section class="section">
     <h2>How I got here</h2>
+    <Sketch name="module-side" width={560} top="0" right="-200px" />
+    <Sketch name="cam-follower" width={420} top="45%" left="-230px" />
     <div class="timeline">
       {
         timeline.map(([year, text]) => (
@@ -158,6 +164,7 @@ const listWords = (items: string[][]) =>
 
   <section class="section">
     <h2>Outside of engineering</h2>
+    <Sketch name="gear-pair" width={460} top="-40px" right="-120px" />
     <p class="big">
       In my first year I was programming chair for my residence council. We got the In-N-Out truck to come to Parkside
       and put on Parkchella, an end-of-year party for 650+ residents.

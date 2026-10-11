@@ -28,6 +28,7 @@ links:
     href: https://github.com/ycjohnp/self-assembling-modular-robots
   - label: Demo video
     href: https://www.youtube.com/watch?v=8HDp2pXij3Y
+sketches: [module, module-side, center-frame, module-front, pcb-front, gears]
 ---
 
 ## Why I built it

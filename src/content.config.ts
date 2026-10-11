@@ -26,6 +26,8 @@ const projects = defineCollection({
       video: z.object({ src: z.string(), poster: z.string().optional(), caption: z.string().optional() }).optional(),
       facts: z.array(z.object({ label: z.string(), value: z.string() })).default([]),
       links: z.array(z.object({ label: z.string(), href: z.string().url() })).default([]),
+      /** Line drawings (names in src/assets/drawings/) shown faintly behind the project page. */
+      sketches: z.array(z.string()).default([]),
     }),
 });
 

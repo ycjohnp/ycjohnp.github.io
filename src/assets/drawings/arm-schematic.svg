@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="34 56 330 252" fill="none" stroke="#111418" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><style>path,circle{vector-effect:non-scaling-stroke}.dash{stroke-dasharray:4 3}.center{stroke-dasharray:14 3 2 3}.spin,.spin-back{transform-box:fill-box;transform-origin:center}@media (prefers-reduced-motion:no-preference){.spin{animation:t 40s linear infinite}.spin-back{animation:t 67.7s linear infinite reverse}}@keyframes t{to{transform:rotate(360deg)}}</style>
+<path d="M48 286 L196 286"/>
+<path d="M54 288 L45 297"/>
+<path d="M68 288 L59 297"/>
+<path d="M82 288 L73 297"/>
+<path d="M96 288 L87 297"/>
+<path d="M110 288 L101 297"/>
+<path d="M124 288 L115 297"/>
+<path d="M138 288 L129 297"/>
+<path d="M152 288 L143 297"/>
+<path d="M166 288 L157 297"/>
+<path d="M180 288 L171 297"/>
+<path d="M98 286 L98 262 L142 262 L142 286"/>
+<path d="M135 246 L135 262 L105 262 L105 246 Z"/>
+<path class="center" d="M120 300 L120 228"/>
+<path d="M120 246 L120 215"/>
+<path class="dash" d="M121.9 197.2 L141.4 105.3"/>
+<path class="dash" d="M152.2 95.2 L237.4 83.2"/>
+<path class="dash" d="M253.9 86.7 L285.3 106.3"/>
+<circle class="dash" cx="143.3" cy="96.4" r="9"/>
+<circle class="dash" cx="246.3" cy="82" r="9"/>
+<path class="dash" d="M304.8 109.1 L292.9 101.7 L291.1 97 L279.5 115.7 L284.4 115.3 L296.3 122.7"/><path class="dash" d="M304.8 109.1 L305.7 113.2"/><path class="dash" d="M296.3 122.7 L300.4 121.7"/>
+<path d="M125.5 198.9 L183.4 124.8"/>
+<path d="M197.7 119.9 L281.1 140.7"/>
+<path d="M294.1 150.8 L311.5 183.5"/>
+<circle cx="120" cy="206" r="9"/><circle cx="120" cy="206" r="1.6"/>
+<circle cx="189" cy="117.7" r="9"/><circle cx="189" cy="117.7" r="1.6"/>
+<circle cx="289.9" cy="142.9" r="9"/><circle cx="289.9" cy="142.9" r="1.6"/>
+<path d="M144 166.4 L156.3 150.6 L165 157.4 L152.7 173.1 Z"/>
+<path d="M231 122.6 L250.4 127.4 L247.8 138.1 L228.4 133.2 Z"/>
+<path d="M301.3 154.9 L307.9 167.3 L300 171.5 L293.4 159.1 Z"/>
+<path d="M327 195.7 L320.4 183.3 L321.2 178.4 L301.7 188.7 L306.3 190.8 L312.8 203.2"/><path d="M327 195.7 L325.7 199.7"/><path d="M312.8 203.2 L316.9 204.4"/>
+<path class="dash" d="M127.1 172.7 L127.8 172.9 L128.6 173.1 L129.3 173.3 L130.1 173.5 L130.8 173.8 L131.5 174 L132.2 174.3 L133 174.6 L133.7 174.9 L134.4 175.2 L135.1 175.5 L135.8 175.9 L136.4 176.2 L137.1 176.6 L137.8 177 L138.4 177.4 L139.1 177.8 L139.7 178.3 L140.3 178.7 L140.9 179.2"/>
+<path d="M133.5 171.5 L127.1 172.7 L132.4 176.4"/>
+<path d="M137.7 173.5 L140.9 179.2 L134.7 177.5"/>
+</svg>

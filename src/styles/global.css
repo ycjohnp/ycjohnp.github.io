@@ -156,3 +156,50 @@ h3 {
     gap: 2px;
   }
 }
+
+/* Faint line drawings behind the page (src/components/Sketch.astro). They bleed past the window
+   edge, so clip sideways overflow. Setting it on html too stops the browser from moving body's
+   overflow up to the window, so body itself does the clipping. */
+html,
+body {
+  overflow-x: clip;
+}
+
+/* Sketches are positioned against these. Clipping main vertically keeps a sketch near the bottom
+   from making the page taller. */
+main {
+  overflow-y: clip;
+}
+
+main > * {
+  position: relative;
+}
+
+.sketch {
+  position: absolute;
+  /* Behind everything, so photos and figures cover them and they only show through white space. */
+  z-index: -1;
+  width: var(--w);
+  max-width: none;
+  opacity: 0.08;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Base.astro adds .in as each one scrolls into view, and it wipes in from left to right. */
+@media (prefers-reduced-motion: no-preference) {
+  .js .sketch {
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 2.4s cubic-bezier(0.45, 0, 0.2, 1);
+  }
+
+  .js .sketch.in {
+    clip-path: inset(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .sketch {
+    width: calc(var(--w) * 0.6);
+  }
+}

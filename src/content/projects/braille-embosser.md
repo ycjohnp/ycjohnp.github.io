@@ -19,6 +19,7 @@ facts:
 links:
   - label: Code and design files
     href: https://github.com/ycjohnp/novel-camshaft-braille-embosser
+sketches: [cam-follower, linkage]
 ---
 
 Commercial braille embossers cost $2,000 to $5,000 and rely on loud linear solenoids. This design uses a camshaft instead.

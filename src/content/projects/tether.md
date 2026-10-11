@@ -20,6 +20,7 @@ facts:
     value: About 8 people across mechanical, electrical and software
   - label: Stack
     value: ESP32, ESP-NOW, ROS, URDF, motion capture, AprilTags
+sketches: [tether-ladder, gear-pair]
 ---
 
 Tether turns a 7-DOF robotic arm into an untethered 7-DOF inchworm robot with a gripper on each end. It moves by switching which end is anchored. I own the mechanical and electrical design and help run the program.

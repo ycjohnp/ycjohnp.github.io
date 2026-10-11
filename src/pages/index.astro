@@ -3,18 +3,27 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Photo from '../components/Photo.astro';
 import CalloutFigure from '../components/CalloutFigure.astro';
-import ProjectRow from '../components/ProjectRow.astro';
+import Sketch from '../components/Sketch.astro';
 import coveCad from '../assets/projects/cove/cad.jpg';
 import { degree, experience, profile } from '../data/site';
 import { dateRange, monthYear } from '../lib/dates';
 import { myPhoto } from '../lib/photos';
+import { Image, getImage } from 'astro:assets';
 import { url } from '../lib/url';
 
 const featured = (await getCollection('projects', (p) => p.data.featured)).sort((a, b) => a.data.order - b.data.order);
+const top = featured.slice(0, 3);
+const rest = await Promise.all(
+  featured.slice(3).map(async (p) => ({
+    project: p,
+    preview: p.data.cover ? (await getImage({ src: p.data.cover, width: 480 })).src : undefined,
+  })),
+);
 ---
 
 <Base>
   <section class="intro">
+    <Sketch name="cove" width={640} top="0" right="-140px" />
     <div class="portrait">
       <Photo
         src={myPhoto('portrait')}
@@ -58,6 +67,7 @@ const featured = (await getCollection('projects', (p) => p.data.featured)).sort(
   </section>
 
   <section class="section">
+    <Sketch name="gear-pair" width={520} top="-150px" left="-200px" />
     <div class="section-head">
       <h2>Latest build: Cove<span class="tagline">7-DOF robotic arm</span></h2>
       <a href={url('/projects/cove/')}>Read how it works</a>
@@ -84,15 +94,48 @@ const featured = (await getCollection('projects', (p) => p.data.featured)).sort(
   </section>
 
   <section class="section">
+    <Sketch name="module" width={620} top="540px" left="-260px" />
+    <Sketch name="arm-schematic" width={520} top="1100px" right="-170px" />
     <h2>Projects</h2>
     <p class="lede">Things I've built at work, in clubs, at hackathons, and on my own.</p>
-    <div class="rows">
-      {featured.map((project) => <ProjectRow project={project} />)}
+    <div class="features">
+      {
+        top.map((p, i) => (
+          <a class:list={['feature', { flip: i % 2 === 1 }]} href={url(`/projects/${p.id}/`)}>
+            {p.data.cover && (
+              <Image src={p.data.cover} alt={p.data.coverAlt ?? ''} widths={[600, 900, 1200]} sizes="(max-width: 800px) 100vw, 620px" />
+            )}
+            <div class="ftext">
+              <h3>{p.data.title}</h3>
+              <p class="ftag">{p.data.tagline}</p>
+              <p class="fsum">{p.data.summary}</p>
+              <p class="fctx">{p.data.context}</p>
+            </div>
+          </a>
+        ))
+      }
     </div>
+    <h3 class="more-head">More projects</h3>
+    <ul class="compact">
+      {
+        rest.map(({ project: p, preview }) => (
+          <li>
+            <a href={url(`/projects/${p.id}/`)} data-preview={preview}>
+              <span class="ct">{p.data.title}</span>
+              <span class="cg">{p.data.tagline}</span>
+              <span class="cc">{p.data.context}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <img class="preview" alt="" aria-hidden="true" />
     <p><a href={url('/projects/')}>See all projects</a></p>
   </section>
 
   <section class="section">
+    <Sketch name="gripper" width={380} top="-60px" right="-60px" />
+    <Sketch name="gears" width={820} top="300px" left="-120px" />
     <h2>Where I've worked</h2>
     <div class="table-scroll">
       <table class="work">
@@ -113,6 +156,23 @@ const featured = (await getCollection('projects', (p) => p.data.featured)).sort(
       </table>
     </div>
   </section>
+
+  <script>
+    // In the compact list, a small preview image follows the pointer.
+    const preview = document.querySelector<HTMLImageElement>('.preview');
+    document.querySelectorAll<HTMLAnchorElement>('.compact a[data-preview]').forEach((a) => {
+      a.addEventListener('mouseenter', () => {
+        preview!.src = a.dataset.preview!;
+        preview!.classList.add('on');
+      });
+      a.addEventListener('mouseleave', () => preview!.classList.remove('on'));
+      a.addEventListener('mousemove', (e) => {
+        preview!.style.transform = `translate(${e.clientX + 24}px, ${e.clientY - 80}px)`;
+      });
+    });
+    // Scrolling moves the list out from under the pointer without a mouseleave, so hide it then too.
+    addEventListener('scroll', () => preview!.classList.remove('on'), { passive: true });
+  </script>
 </Base>
 
 <style>
@@ -121,7 +181,7 @@ const featured = (await getCollection('projects', (p) => p.data.featured)).sort(
     flex-wrap: wrap;
     align-items: flex-start;
     gap: 56px;
-    padding: 64px 0 72px;
+    padding: 64px 0 104px;
   }
 
   .portrait {
@@ -165,10 +225,6 @@ const featured = (await getCollection('projects', (p) => p.data.featured)).sort(
     color: var(--muted);
   }
 
-  .rows {
-    border-top: 1.5px solid var(--ink);
-  }
-
   .table-scroll {
     overflow-x: auto;
   }
@@ -209,6 +265,149 @@ const featured = (await getCollection('projects', (p) => p.data.featured)).sort(
     .intro {
       gap: 32px;
       padding: 40px 0 56px;
+    }
+  }
+
+  /* The top three featured projects get big alternating rows; the rest are a compact list. */
+  .features {
+    border-top: 1.5px solid var(--ink);
+  }
+
+  .feature {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 48px;
+    align-items: center;
+    padding: 40px 0;
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none;
+  }
+
+  .feature.flip {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  }
+
+  .feature.flip img {
+    order: 2;
+  }
+
+  .feature img {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border: 1px solid var(--ink);
+  }
+
+  .feature h3 {
+    margin: 0;
+    font-size: 30px;
+  }
+
+  .feature:hover h3 {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+  }
+
+  .ftag {
+    margin: 4px 0 0;
+    font-size: 19px;
+    color: var(--muted);
+  }
+
+  .fsum {
+    margin: 16px 0 0;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--body);
+  }
+
+  .fctx {
+    margin: 16px 0 0;
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .more-head {
+    margin: 48px 0 8px;
+    font-size: 20px;
+  }
+
+  .compact {
+    margin: 0 0 24px;
+    padding: 0;
+    list-style: none;
+    border-top: 1.5px solid var(--ink);
+  }
+
+  .compact a {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr) auto;
+    gap: 24px;
+    align-items: baseline;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none;
+  }
+
+  .ct {
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  .cg {
+    color: var(--body);
+  }
+
+  .cc {
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .compact a:hover .ct {
+    text-decoration: underline;
+  }
+
+  .preview {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 20;
+    width: 240px;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border: 1px solid var(--ink);
+    background: var(--bg);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .preview.on {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    .preview {
+      display: none;
+    }
+  }
+
+  @media (max-width: 800px) {
+    .feature,
+    .feature.flip {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 20px;
+    }
+
+    .feature.flip img {
+      order: 0;
+    }
+
+    .compact a {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 2px;
     }
   }
 </style>

@@ -3,6 +3,7 @@ import type { GetStaticPaths } from 'astro';
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
+import Sketch from '../../components/Sketch.astro';
 import { url } from '../../lib/url';
 
 export const getStaticPaths = (async () => {
@@ -20,12 +21,23 @@ interface Props {
 }
 
 const { project, prev, next } = Astro.props;
-const { title, tagline, summary, gallery, video, facts, links } = project.data;
+const { title, tagline, summary, gallery, video, facts, links, sketches } = project.data;
+// Spread the project's drawings down the page, alternating sides. Projects without drawings of their own
+// get two of the general mechanism drawings, rotated by project so neighboring pages differ.
+const general = ['gear-pair', 'linkage', 'cam-follower'];
+const fallback = [general[project.data.order % 3], general[(project.data.order + 1) % 3]];
+const placed = (sketches.length ? sketches : fallback).map((name, i, all) => ({
+  name,
+  top: `${(i * 92) / all.length + 2}%`,
+  side: i % 2 === 0 ? { right: '-190px' } : { left: '-210px' },
+  width: [560, 500, 600][i % 3],
+}));
 const { Content } = await render(project);
 ---
 
 <Base title={`${title}: ${tagline}`} description={summary} current="projects">
   <article class="project">
+    {placed.map((p) => <Sketch name={p.name} width={p.width} top={p.top} {...p.side} />)}
     <p class="crumb"><a href={url('/projects/')}>Projects</a></p>
     <h1>{title}<span class="tagline">{tagline}</span></h1>
     <p class="big">{summary}</p>

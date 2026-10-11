@@ -36,6 +36,7 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <script is:inline>document.documentElement.classList.add('js');</script>
   </head>
   <body>
     <div class="wrap">
@@ -45,5 +46,19 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
       </main>
       <Footer />
     </div>
+    <script>
+      // Wipe each background sketch in once, as it scrolls into view (see .sketch in global.css).
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            entry.target.classList.add('in');
+            observer.unobserve(entry.target);
+          }
+        },
+        { rootMargin: '0px 0px -10% 0px' },
+      );
+      document.querySelectorAll('.sketch').forEach((el) => observer.observe(el));
+    </script>
   </body>
 </html>
