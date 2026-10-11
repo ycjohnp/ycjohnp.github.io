@@ -23,6 +23,7 @@ facts:
     value: About 36 hours, with 10+ hardware revisions and 100+ 3D prints
   - label: Stack
     value: Innate MARS robot, Gemini, CadQuery, multicolor 3D printing, AprilTags
+sketches: [unia, apriltags, static-start]
 ---
 
 A software agent can call tools. A hardware agent should be able to make them. That was the idea behind ID0, which we built at Y Combinator's RoboHacks.

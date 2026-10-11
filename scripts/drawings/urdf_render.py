@@ -1,7 +1,7 @@
 """Line drawing of a URDF robot (STL meshes), posed by its joints: renders surface normals and depth with
 smoothed normals, then marks creases and depth jumps. Writes an edge mask PNG for trace.py --mode light.
 
-usage: urdf_render.py ROBOT.urdf OUT.png [--az DEG] [--el DEG] [--joint name=rad ...] [--feature DEG] [--px N]
+usage: urdf_render.py ROBOT.urdf|PART.stl OUT.png [--az DEG] [--el DEG] [--joint name=rad ...] [--feature DEG] [--px N]
   The package:// mesh paths are resolved against the folder above the urdf/ directory.
   Lines: creases (normals differing by more than --feature), depth jumps where one part passes in front of
   another, and the outline against the background. Normals are smoothed within each surface first, so curved
@@ -17,7 +17,7 @@ import vtk
 from vtk.util.numpy_support import vtk_to_numpy
 
 ap = argparse.ArgumentParser()
-ap.add_argument('urdf')
+ap.add_argument('urdf', help='a .urdf file, or a single .stl to draw on its own')
 ap.add_argument('out')
 ap.add_argument('--az', type=float, default=35, help='camera azimuth around the vertical axis, degrees')
 ap.add_argument('--el', type=float, default=25, help='camera elevation, degrees')
@@ -31,7 +31,12 @@ ap.add_argument('--skip', action='append', default=[], help='leave out meshes wh
 a = ap.parse_args()
 
 root_dir = os.path.dirname(os.path.dirname(os.path.abspath(a.urdf)))
-robot = ET.parse(a.urdf).getroot()
+if a.urdf.lower().endswith('.stl'):
+    # A lone part: wrap it as a one-link robot.
+    robot = ET.fromstring(f'<robot><link name="part"><visual><geometry><mesh filename="{os.path.abspath(a.urdf)}"/>'
+                          '</geometry></visual></link></robot>')
+else:
+    robot = ET.parse(a.urdf).getroot()
 angles = {k: float(v) for k, v in (j.split('=') for j in a.joint)}
 
 
@@ -92,8 +97,9 @@ for link in robot.findall('link'):
         m = vis.find('geometry/mesh')
         if m is None:
             continue
-        path = m.get('filename').replace('package://', '')
-        path = os.path.join(root_dir, path.split('/', 1)[1])
+        path = m.get('filename')
+        if path.startswith('package://'):
+            path = os.path.join(root_dir, path.replace('package://', '').split('/', 1)[1])
         if any(os.path.basename(path).startswith(k) for k in a.skip):
             continue
         T = to_z_up @ world.get(link.get('name'), np.eye(4)) @ origin(vis.find('origin'))

@@ -27,7 +27,7 @@ facts:
 links:
   - label: Code on GitHub
     href: https://github.com/ycjohnp/aruco-compliant-hand
-sketches: [finger, linkage]
+sketches: [aruco-finger, finger, aruco-board]
 ---
 
 Scrambler is a fully passive climbing hand for the Unitree G1. It lets the humanoid drop to all fours and scramble up terrain steeper than it can walk, with no added motors, wiring or firmware. TPU Fin Ray fingers turn the robot's weight into grip.

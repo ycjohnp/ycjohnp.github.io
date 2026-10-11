@@ -18,6 +18,7 @@ facts:
     value: Embedded systems engineer and wireless systems lead
   - label: Stack
     value: ESP32, 6-DoF IMU, KiCad, reflow assembly, Unity
+sketches: [makers-rocket, linkage]
 ---
 
 Wearable motion trackers stream to a central receiver and drive a 3D skeleton in a training game.

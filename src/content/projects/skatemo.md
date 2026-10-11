@@ -20,6 +20,7 @@ facts:
     value: Six people across electrical, mechanical and software
   - label: Stack
     value: OpenCV, YOLO, IMU and camera fusion, BLDC motor control
+sketches: [makers-rocket, gear-pair]
 ---
 
 SkateMo is a skateboard that drives itself to a destination you pick, avoiding obstacles along the way.
