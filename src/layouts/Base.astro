@@ -32,6 +32,7 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
+    <link rel="icon" type="image/png" href={url('/favicon.png')} />
     {canonical && <link rel="canonical" href={canonical} />}
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
@@ -59,6 +60,60 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
         { rootMargin: '0px 0px -10% 0px' },
       );
       document.querySelectorAll('.sketch').forEach((el) => observer.observe(el));
+    </script>
+    <script>
+      // The favicon is a real ArUco marker (DICT_4X4_50). Scrolling steps it through the dictionary's ids,
+      // one id per 100px. Each number is a marker's inner 4x4 cells, row by row, high bit first, 1 = black
+      // (from cv2.aruco; public/favicon.svg and favicon.png are id 0, for before this runs).
+      const MARKERS = [
+        19149, 61541, 52434, 26297, 43873, 34354, 25041, 15117, 293, 12457, 1646, 61016, 61768, 54768, 56142,
+        55745, 47514, 39423, 37793, 35152, 31092, 20436, 13098, 8829, 440, 27534, 21275, 23211, 57052, 52112,
+        48106, 43085, 24880, 3892, 63313, 63190, 59274, 64256, 61961, 58277, 59623, 54743, 52595, 51021, 56087,
+        53524, 53952, 46235, 45009, 45036,
+      ];
+      const STEP = 100;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 64;
+      const ctx = canvas.getContext('2d')!;
+      // One link that we keep pointing at the current marker; the static ones stay as the fallback.
+      const link = document.createElement('link');
+      link.rel = 'icon';
+      link.type = 'image/png';
+
+      function draw(id: number) {
+        const bits = MARKERS[id];
+        ctx.clearRect(0, 0, 64, 64);
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.roundRect(0, 0, 64, 64, 10);
+        ctx.fill();
+        // 8x8 cells of 8px: a white quiet zone, the black border, and the 4x4 data cells inside it.
+        ctx.fillStyle = '#111418';
+        for (let row = 0; row < 6; row++) {
+          for (let col = 0; col < 6; col++) {
+            const border = row === 0 || row === 5 || col === 0 || col === 5;
+            const black = border || (bits >> (15 - ((row - 1) * 4 + (col - 1)))) & 1;
+            if (black) ctx.fillRect(8 + col * 8, 8 + row * 8, 8, 8);
+          }
+        }
+        link.href = canvas.toDataURL('image/png');
+        if (!link.isConnected) {
+          document.querySelectorAll('link[rel="icon"]').forEach((el) => el.remove());
+          document.head.append(link);
+        }
+      }
+
+      // Redraws only when the id changes, so most scroll events do nothing.
+      let shown = 0;
+      window.addEventListener(
+        'scroll',
+        () => {
+          const id = Math.floor(window.scrollY / STEP) % MARKERS.length;
+          if (id !== shown) draw((shown = id));
+        },
+        { passive: true },
+      );
     </script>
   </body>
 </html>

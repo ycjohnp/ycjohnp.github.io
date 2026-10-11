@@ -5,9 +5,11 @@ summary: A 7-DOF inchworm robot made of three wireless modules that moves by alt
 context: Terra Labs, 2026 to now
 order: 2
 featured: true
-cover: ../../assets/projects/tether/sim-ladder-2.jpg
-coverAlt: Simulation of the inchworm robot on a ladder
+cover: ../../assets/projects/tether/render.png
+coverAlt: Render of Tether hanging from a ladder rung by one end
 gallery:
+  - src: ../../assets/projects/tether/render.png
+    alt: Render of Tether hanging from a ladder rung by one end
   - src: ../../assets/projects/tether/sim-editor.jpg
     alt: The team's web-based simulator replaying a ladder climb
     caption: The team's simulator replaying a ladder climb
