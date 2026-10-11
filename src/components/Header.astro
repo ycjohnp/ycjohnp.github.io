@@ -125,6 +125,28 @@ const hasResume = existsSync('public/resume.pdf');
     stroke-linejoin: round;
   }
 
+  /* Phones: tighten the nav so the name, the links and the toggle fit on one line down to 360px wide. They
+     stay 44px tall, so they're still easy to tap. */
+  @media (max-width: 480px) {
+    .name {
+      font-size: 18px;
+    }
+
+    nav {
+      gap: 0;
+      margin-right: -6px;
+    }
+
+    nav a {
+      padding: 0 6px;
+      font-size: 16px;
+    }
+
+    .theme {
+      width: 34px;
+    }
+  }
+
   /* Which icon shows follows the same rules as the dark colors in global.css. */
   .sun {
     display: none;
