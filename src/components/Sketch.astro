@@ -28,6 +28,8 @@ if (!src) throw new Error(`Sketch: no drawing named "${name}" in src/assets/draw
 const style = [`--w: ${width}px`, `top: ${top}`, left && `left: ${left}`, right && `right: ${right}`]
   .filter(Boolean)
   .join('; ');
+// No loading="lazy": Chrome decides when to load a lazy image from its visible area, and a sketch starts
+// clipped down to its left edge (see .sketch in global.css), so ones that bleed off the left never loaded.
 ---
 
-<img class="sketch" src={src} alt="" aria-hidden="true" loading="lazy" decoding="async" style={style} />
+<img class="sketch" src={src} alt="" aria-hidden="true" decoding="async" style={style} />

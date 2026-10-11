@@ -48,18 +48,28 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
       <Footer />
     </div>
     <script>
-      // Wipe each background sketch in once, as it scrolls into view (see .sketch in global.css).
-      const observer = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            if (!entry.isIntersecting) continue;
-            entry.target.classList.add('in');
-            observer.unobserve(entry.target);
+      // Wipe each background sketch in once, as it scrolls into view (see .sketch in global.css). This checks
+      // positions on scroll rather than using an IntersectionObserver: Chrome measures a target by its visible
+      // area, and before the wipe a sketch is clipped down to its left edge, which is off screen for sketches
+      // that bleed past the left of the page, so they'd never count as in view.
+      const pending = new Set(document.querySelectorAll('.sketch'));
+      function reveal() {
+        // Anything whose top is above 90% of the window height, including sketches already scrolled past.
+        const line = window.innerHeight * 0.9;
+        for (const el of pending) {
+          if (el.getBoundingClientRect().top < line) {
+            el.classList.add('in');
+            pending.delete(el);
           }
-        },
-        { rootMargin: '0px 0px -10% 0px' },
-      );
-      document.querySelectorAll('.sketch').forEach((el) => observer.observe(el));
+        }
+        if (!pending.size) {
+          window.removeEventListener('scroll', reveal);
+          window.removeEventListener('resize', reveal);
+        }
+      }
+      window.addEventListener('scroll', reveal, { passive: true });
+      window.addEventListener('resize', reveal);
+      reveal();
     </script>
     <script>
       // The favicon is a real ArUco marker (DICT_4X4_50). Scrolling steps it through the dictionary's ids,
