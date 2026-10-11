@@ -33,7 +33,7 @@ sketches: [module, module-side, center-frame, module-front, pcb-front, gears]
 
 ## Why I built it
 
-In spring 2022, Shanghai went into a three-month lockdown. For weeks it was hard to get food or supplies delivered, because the people who run logistics couldn't go to work. I started asking how delivery networks could keep working when that happens.
+In spring 2022, my city went into a three-month lockdown. For weeks it was hard to get food or supplies delivered, because the people who run logistics couldn't go to work. I started asking how delivery networks could keep working when that happens.
 
 A lot of what I read pointed to flexibility and adaptability, and modular robots have both. Most modular robotics research was aimed at search and rescue or static structures, so I wanted to see whether robots that solve problems together could make logistics more reliable and less dependent on people.
 
