@@ -62,7 +62,9 @@ python3 scripts/drawings/logo.py terra.webp raw.svg --up 4 --colors 3 --brush --
 `draw.py` makes the gear pair and the arm schematic; `mech.py` makes the cam and follower and the four-bar
 linkage. `aruco.py` makes the ArUco drawings: real DICT_5X5_100 markers in perspective with their pose axes,
 normals and pose boxes. `braille.py OUT.svg WORD` draws a word in braille at standard spacing, with a section
-through the embossed dots. Run each with an output path, then `finalize.py` each file. Don't run these
+through the embossed dots. `motor.py` redraws the Cove and Tether actuator face on from the vendor's dimensioned
+drawing (true circles and its dimension lines, no text); a clean vendor drawing like that is better redrawn from
+its dimensions than traced. Run each with an output path, then `finalize.py` each file. Don't run these
 through `slim.py`: it merges everything into one path and would drop the dashed line styles.
 
 ## Checking a drawing
