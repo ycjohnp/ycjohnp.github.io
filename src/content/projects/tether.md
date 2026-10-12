@@ -7,6 +7,10 @@ order: 2
 featured: true
 cover: ../../assets/projects/tether/render.png
 coverAlt: Render of Tether hanging from a ladder rung by one end
+video:
+  src: media/tether-sim.mp4
+  poster: media/tether-sim-poster.jpg
+  caption: Tether climbing from the ground onto a ladder in the team's simulator
 gallery:
   - src: ../../assets/projects/tether/render.png
     alt: Render of Tether hanging from a ladder rung by one end
