@@ -22,7 +22,7 @@ facts:
   - label: Results
     value: 339 N connection strength, 0.2 m/s
   - label: Awards
-    value: First Award in Embedded Systems at Regeneron ISEF 2023, and a top award at the EU Contest for Young Scientists
+    value: First Award in Embedded Systems and a Top Award at Regeneron ISEF 2023, representing ISEF and the US at the EU Contest for Young Scientists
 links:
   - label: Code and design files
     href: https://github.com/ycjohnp/self-assembling-modular-robots
@@ -68,4 +68,4 @@ The modules move at 0.2 m/s, and the electromagnetic connections between them ho
 
 ## Awards
 
-The project won First Award in Embedded Systems at Regeneron ISEF in 2023. ISEF then sent me to represent it at the EU Contest for Young Scientists, where the project won a top award.
+At Regeneron ISEF in 2023 the project won First Award in Embedded Systems and a Top Award: representing ISEF and the US at the EU Contest for Young Scientists.

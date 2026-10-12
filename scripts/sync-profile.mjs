@@ -24,6 +24,9 @@ const experience = readdirSync(join(profileDir, 'experience'))
   .filter((file) => file.endsWith('.yaml'))
   .map((file) => read(join('experience', file)));
 
+// Roles whose city stays off the site (see commit 95c6781), so a sync doesn't put it back.
+const hideCity = new Set(['manycore-ml-2025', 'mfe-iot-2024']);
+
 const profile = {
   _generated: 'By scripts/sync-profile.mjs from a2j/profile. Edit a2j, then run `npm run sync`.',
   name: basics.preferred_name,
@@ -47,7 +50,7 @@ const profile = {
       company: x.company,
       title: x.title,
       project: x.project ?? null,
-      location: x.location ?? null,
+      location: hideCity.has(x.id) ? null : (x.location ?? null),
       start: x.start,
       end: x.end,
     }))
