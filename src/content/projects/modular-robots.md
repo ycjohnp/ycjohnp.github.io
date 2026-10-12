@@ -28,7 +28,7 @@ links:
     href: https://github.com/ycjohnp/self-assembling-modular-robots
   - label: Demo video
     href: https://www.youtube.com/watch?v=8HDp2pXij3Y
-sketches: [module, module-side, center-frame, module-front, pcb-front, gears]
+sketches: [module, moving-loads, module-side, center-frame, pid-control, module-front, pcb-front, gears]
 ---
 
 ## Why I built it
@@ -37,9 +37,15 @@ In spring 2022, my city went into a three-month lockdown. For weeks it was hard 
 
 A lot of what I read pointed to flexibility and adaptability, and modular robots have both. Most modular robotics research was aimed at search and rescue or static structures, so I wanted to see whether robots that solve problems together could make logistics more reliable and less dependent on people.
 
+![Diagram of a module driving to a pickup point, collecting a cargo box, and carrying it to a goal](../../assets/projects/modular-robots/moving-loads.png)
+*Moving a load. A module turns toward the pickup point, drives to it, picks up the cargo, and carries it to the goal.*
+
 ## How it works
 
 Each module has four degrees of freedom, drives on wheels, and connects to its neighbors with electromagnets. A computer tracks every module with AprilTags and OpenCV and sends commands over ESP-NOW. On each module an ESP32 runs PID control to position it precisely.
+
+![Diagram of two modules, one at its current pose and one at the target pose, with their heading axes, the angles between each heading and the line joining them, and the path between them](../../assets/projects/modular-robots/pid-control.png)
+*Positioning a module. The controller works from the module's pose and the target pose: the angle between its heading and the line to the target, the distance along that line, and the heading to finish at.*
 
 ![Four modules locked together into one larger robot](../../assets/projects/modular-robots/assembled.jpg)
 ![CAD render of a single module](../../assets/projects/modular-robots/module-cad.png)

@@ -67,6 +67,16 @@ drawing (true circles and its dimension lines, no text); a clean vendor drawing 
 its dimensions than traced. Run each with an output path, then `finalize.py` each file. Don't run these
 through `slim.py`: it merges everything into one path and would drop the dashed line styles.
 
+## From a Lucidchart diagram
+
+`diagrams.py OUTDIR` redraws the two diagrams on the modular robots page, moving loads and PID positioning,
+from the Lucidchart exports in `lucid/` (saved with their embedded module renders stripped out). Each render
+is replaced by `module-side.svg`, the top-down view of the module, placed under the same transform; boxes
+and arrows become single-weight strokes, Lucid's hand-dashed heading lines become `.center` axes, the dashed
+target path becomes `.dash`, and filled arrowheads become open ones. Then `finalize.py` each file. The
+original color diagrams are the figures in the page text (rendered to PNG with `rsvg-convert`); these line
+versions are the page's background sketches.
+
 ## Checking a drawing
 
 `svgpng.py raw.svg preview.png 1200` renders one to a PNG so you can look at it before it goes on the site.
