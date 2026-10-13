@@ -7,8 +7,8 @@ interface Props {
 }
 
 const { current } = Astro.props;
-// The Resume link appears once public/resume.pdf exists.
-const hasResume = existsSync('public/resume.pdf');
+// The Resume link appears once public/John-Peng-Resume.pdf exists.
+const hasResume = existsSync('public/John-Peng-Resume.pdf');
 ---
 
 <header class="site-header">
@@ -16,8 +16,8 @@ const hasResume = existsSync('public/resume.pdf');
   <nav aria-label="Main">
     <a href={url('/projects/')} aria-current={current === 'projects' ? 'page' : undefined}>Projects</a>
     <a href={url('/about/')} aria-current={current === 'about' ? 'page' : undefined}>About</a>
-    {hasResume && <a href={url('/resume.pdf')}>Resume</a>}
-    <a href="#contact">Contact</a>
+    {hasResume && <a href={url('/John-Peng-Resume.pdf')}>Resume</a>}
+    <a class="contact" href="#contact">Contact</a>
     <button class="theme" type="button" aria-label="Switch to dark mode">
       <!-- A moon in light mode (click for dark) and a sun in dark mode (click for light). -->
       <svg class="moon" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
@@ -126,8 +126,13 @@ const hasResume = existsSync('public/resume.pdf');
   }
 
   /* Phones: tighten the nav so the name, the links and the toggle fit on one line down to 360px wide. They
-     stay 44px tall, so they're still easy to tap. */
-  @media (max-width: 480px) {
+     stay 44px tall, so they're still easy to tap. Contact is dropped to make room; the footer it points to is
+     a short scroll away. */
+  @media (max-width: 520px) {
+    nav .contact {
+      display: none;
+    }
+
     .name {
       font-size: 18px;
     }

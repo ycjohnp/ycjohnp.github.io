@@ -45,7 +45,7 @@ frontmatter (`cover`, `gallery`).
 
 ### Resume
 
-Put the PDF at `public/resume.pdf` and a Resume link appears in the header.
+Put the PDF at `public/John-Peng-Resume.pdf` and a Resume link appears in the header.
 
 ### Unfinished text
 
