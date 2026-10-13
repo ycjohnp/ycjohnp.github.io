@@ -66,9 +66,10 @@ const { src, alt, callouts } = Astro.props;
     border-right: 1px solid var(--ink);
   }
 
+  /* Give it an image with a transparent background (scripts/cutout.py makes one from a render on white), so
+     the grid shows around it in both light and dark mode. */
   .drawing img {
     width: 100%;
-    mix-blend-mode: multiply;
   }
 
   .balloon {
