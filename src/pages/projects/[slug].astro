@@ -21,7 +21,7 @@ interface Props {
 }
 
 const { project, prev, next } = Astro.props;
-const { title, tagline, summary, gallery, video, facts, links, sketches } = project.data;
+const { title, tagline, summary, gallery, video, youtube, facts, links, sketches } = project.data;
 // Spread the project's drawings down the page, alternating sides. Projects without drawings of their own
 // get two of the general mechanism drawings, rotated by project so neighboring pages differ.
 const general = ['gear-pair', 'linkage', 'cam-follower'];
@@ -43,8 +43,22 @@ const { Content } = await render(project);
     <p class="big">{summary}</p>
 
     {
-      (gallery.length > 0 || video) && (
+      (gallery.length > 0 || video || youtube) && (
         <div class="gallery">
+          {youtube && (
+            <figure>
+              <iframe
+                class="video"
+                src={`https://www.youtube-nocookie.com/embed/${youtube.id}?rel=0`}
+                title={youtube.title}
+                loading="lazy"
+                allow="encrypted-media; picture-in-picture; fullscreen"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+              />
+              {youtube.caption && <figcaption>{youtube.caption}</figcaption>}
+            </figure>
+          )}
           {video && (
             <figure>
               <video
@@ -167,7 +181,8 @@ const { Content } = await render(project);
   }
 
   .gallery img,
-  .gallery video {
+  .gallery video,
+  .gallery iframe {
     display: block;
     width: 100%;
     aspect-ratio: 4 / 3;
@@ -176,7 +191,8 @@ const { Content } = await render(project);
     border: 1px solid var(--ink);
   }
 
-  .gallery video {
+  .gallery video,
+  .gallery iframe {
     background: var(--ink);
   }
 

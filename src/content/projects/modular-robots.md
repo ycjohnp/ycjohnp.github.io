@@ -12,6 +12,9 @@ gallery:
     alt: Three modular robots, one stacked on top of two others
   - src: ../../assets/projects/modular-robots/single-module.jpg
     alt: A single module with its gear rings and electronics exposed
+youtube:
+  id: 8HDp2pXij3Y
+  title: Modular robot demo
 facts:
   - label: Hardware
     value: 4-DoF wheeled modules with electromagnetic connectors, ESP32, custom extension PCB
@@ -26,8 +29,6 @@ facts:
 links:
   - label: Code and design files
     href: https://github.com/ycjohnp/self-assembling-modular-robots
-  - label: Demo video
-    href: https://www.youtube.com/watch?v=8HDp2pXij3Y
 sketches: [module, moving-loads, module-side, center-frame, pid-control, module-front, pcb-front, gears]
 ---
 
