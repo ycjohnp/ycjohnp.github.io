@@ -45,7 +45,13 @@ frontmatter (`cover`, `gallery`).
 
 ### Resume
 
-Put the PDF at `public/John-Peng-Resume.pdf` and a Resume link appears in the header.
+Put the PDF at `public/John-Peng-Resume.pdf` and a Resume link appears in the header. It goes to
+`/resume/`, which shows the page as an image and links the PDF. After replacing the PDF, re-render
+that image:
+
+```bash
+pdftoppm -png -r 220 -singlefile public/John-Peng-Resume.pdf src/assets/resume/page
+```
 
 ### Unfinished text
 

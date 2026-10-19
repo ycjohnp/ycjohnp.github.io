@@ -1,0 +1,82 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Sketch from '../components/Sketch.astro';
+import { url } from '../lib/url';
+// The PDF's one page as an image, rendered from public/John-Peng-Resume.pdf. Safari on iPhone and iPad
+// only half shows a PDF embedded in a page, so the page shows this and links the PDF. After replacing the
+// PDF, re-render it with: pdftoppm -png -r 220 -singlefile public/John-Peng-Resume.pdf src/assets/resume/page
+import page from '../assets/resume/page.png';
+
+const pdf = url('/John-Peng-Resume.pdf');
+---
+
+<Base title="Resume" description="John Peng's resume: robotics, embedded firmware and AI software." current="resume">
+  <section class="section page">
+    <Sketch name="gear-pair" width={520} top="-20px" right="-200px" />
+    <Sketch name="aruco-pose" width={560} top="45%" left="-260px" />
+    <div class="head">
+      <h1>Resume</h1>
+      <a class="download" href={pdf} download>Download PDF</a>
+    </div>
+    <a class="sheet" href={pdf}>
+      <Image
+        src={page}
+        alt="John Peng's resume. The text version is the PDF, linked above."
+        widths={[800, 1200, 1870]}
+        sizes="(max-width: 960px) 100vw, 880px"
+        loading="eager"
+      />
+    </a>
+  </section>
+</Base>
+
+<style>
+  .page {
+    padding-top: 64px;
+  }
+
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    max-width: 880px;
+    margin-bottom: 28px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(40px, 6vw, 52px);
+    letter-spacing: -0.02em;
+  }
+
+  .download {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid var(--ink);
+    text-decoration: none;
+  }
+
+  .download:hover {
+    border-color: var(--accent);
+  }
+
+  /* The page stays white paper in dark mode too, so it reads like the PDF. */
+  .sheet {
+    display: block;
+    max-width: 880px;
+    border: 1px solid var(--rule);
+    background: #fff;
+    box-shadow: 0 8px 28px rgb(0 0 0 / 0.08);
+  }
+
+  .sheet img {
+    width: 100%;
+    height: auto;
+    filter: none;
+  }
+</style>

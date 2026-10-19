@@ -3,11 +3,11 @@ import { existsSync } from 'node:fs';
 import { url } from '../lib/url';
 
 interface Props {
-  current?: 'projects' | 'about';
+  current?: 'projects' | 'about' | 'resume';
 }
 
 const { current } = Astro.props;
-// The Resume link appears once public/John-Peng-Resume.pdf exists.
+// The Resume link, to the resume page, appears once public/John-Peng-Resume.pdf exists.
 const hasResume = existsSync('public/John-Peng-Resume.pdf');
 ---
 
@@ -16,7 +16,13 @@ const hasResume = existsSync('public/John-Peng-Resume.pdf');
   <nav aria-label="Main">
     <a href={url('/projects/')} aria-current={current === 'projects' ? 'page' : undefined}>Projects</a>
     <a href={url('/about/')} aria-current={current === 'about' ? 'page' : undefined}>About</a>
-    {hasResume && <a href={url('/John-Peng-Resume.pdf')}>Resume</a>}
+    {
+      hasResume && (
+        <a href={url('/resume/')} aria-current={current === 'resume' ? 'page' : undefined}>
+          Resume
+        </a>
+      )
+    }
     <a class="contact" href="#contact">Contact</a>
     <button class="theme" type="button" aria-label="Switch to dark mode">
       <!-- A moon in light mode (click for dark) and a sun in dark mode (click for light). -->
