@@ -15,17 +15,19 @@ interface Props {
   /** Width in px on desktop. Phones get 60% of this. */
   width: number;
   /** Distance from the top of the section, e.g. "-40px" or "35%". */
-  top: string;
+  top?: string;
+  /** Distance from the bottom of the section, instead of top, for a sketch that has to end inside it. */
+  bottom?: string;
   /** Distance from the section's left or right edge. Negative values bleed past the column. */
   left?: string;
   right?: string;
 }
 
-const { name, width, top, left, right } = Astro.props;
+const { name, width, top, bottom, left, right } = Astro.props;
 const src = drawings[name];
 if (!src) throw new Error(`Sketch: no drawing named "${name}" in src/assets/drawings/`);
 
-const style = [`--w: ${width}px`, `top: ${top}`, left && `left: ${left}`, right && `right: ${right}`]
+const style = [`--w: ${width}px`, top && `top: ${top}`, bottom && `bottom: ${bottom}`, left && `left: ${left}`, right && `right: ${right}`]
   .filter(Boolean)
   .join('; ');
 // No loading="lazy": Chrome decides when to load a lazy image from its visible area, and a sketch starts
