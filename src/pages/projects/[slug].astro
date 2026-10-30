@@ -1,10 +1,14 @@
 ---
-import type { GetStaticPaths } from 'astro';
+import type { GetStaticPaths, ImageMetadata } from 'astro';
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import Sketch from '../../components/Sketch.astro';
 import { url } from '../../lib/url';
+
+// Link-preview cards from scripts/og-card.py, by project id. A project without one uses its cover photo.
+const cards = import.meta.glob<ImageMetadata>('../../assets/og/*.jpg', { import: 'default', eager: true });
+const cardFor = (id: string) => cards[`../../assets/og/${id}.jpg`];
 
 export const getStaticPaths = (async () => {
   const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
@@ -21,7 +25,7 @@ interface Props {
 }
 
 const { project, prev, next } = Astro.props;
-const { title, tagline, summary, gallery, video, youtube, facts, links, sketches } = project.data;
+const { title, tagline, summary, cover, coverAlt, gallery, video, youtube, facts, links, sketches } = project.data;
 // Spread the project's drawings down the page, alternating sides. Projects without drawings of their own
 // get two of the general mechanism drawings, rotated by project so neighboring pages differ.
 const general = ['gear-pair', 'linkage', 'cam-follower'];
@@ -35,7 +39,7 @@ const placed = (sketches.length ? sketches : fallback).map((name, i, all) => ({
 const { Content } = await render(project);
 ---
 
-<Base title={`${title}: ${tagline}`} description={summary} current="projects">
+<Base title={`${title}: ${tagline}`} description={summary} image={cardFor(project.id) ?? cover} imageAlt={coverAlt} current="projects">
   <article class="project">
     {placed.map((p) => <Sketch name={p.name} width={p.width} top={p.top} {...p.side} />)}
     <p class="crumb"><a href={url('/projects/')}>Projects</a></p>

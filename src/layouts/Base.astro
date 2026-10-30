@@ -7,21 +7,32 @@ import '@fontsource/ibm-plex-mono/400.css';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import siteCard from '../assets/og/site.jpg';
 import { url } from '../lib/url';
 
 interface Props {
   title?: string;
   description?: string;
   current?: 'projects' | 'about' | 'resume';
+  /** The link-preview image. Defaults to the site card from scripts/og-card.py; project pages pass their own. */
+  image?: ImageMetadata;
+  imageAlt?: string;
 }
 
 const {
   title,
   description = 'John Peng builds robots and the electronics inside them. Electrical and computer engineering at USC.',
   current,
+  image = siteCard,
+  imageAlt = 'John Peng, with a photo of the Cove robotic arm he helped build',
 } = Astro.props;
 const fullTitle = title ? `${title} | John Peng` : 'John Peng';
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+// Link previews want an absolute URL and a 1.91:1 image; LinkedIn, Slack, Discord and iMessage all crop to it.
+const card = await getImage({ src: image, width: 1200, height: 630, fit: 'cover', format: 'jpg', quality: 82 });
+const cardUrl = Astro.site ? new URL(card.src, Astro.site).href : card.src;
 ---
 
 <!doctype html>
@@ -37,6 +48,13 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="John Peng" />
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta property="og:image" content={cardUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
     <script is:inline>
       // Runs before the page paints: mark that scripts run, and apply a theme the visitor picked with the
       // header toggle (see Header.astro), so a saved dark choice doesn't flash white first.

@@ -65,8 +65,24 @@ grep -rn 'class="todo"' src
 ## Adding a project
 
 Create `src/content/projects/<slug>.md`. The frontmatter fields are defined in
-`src/content.config.ts`. Set `featured: true` to list it on the home page, and use
-`order` to sort.
+`src/content.config.ts`, and `order` sorts the lists. It shows up on the home page under
+"More projects" by itself. To put it in the image showcase at the top instead, add it and
+the images to show to the `showcase` list in `src/pages/index.astro`.
+
+Then make its link preview (next section).
+
+### Link previews
+
+The image that shows when a page is pasted into LinkedIn, Slack, Discord or iMessage comes
+from `src/assets/og/`: `site.jpg` for most pages, and `<slug>.jpg` for each project. They're
+drawn from each project's title, tagline, context and cover. Re-make them all after adding a
+project or changing one of those:
+
+```bash
+python3 scripts/og-card.py
+```
+
+A project without a card uses its cover photo, cropped to fit.
 
 ## Deploying
 
