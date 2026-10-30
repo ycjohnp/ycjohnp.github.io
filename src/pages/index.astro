@@ -1,23 +1,97 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
+import { getImage } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import Photo from '../components/Photo.astro';
-import CalloutFigure from '../components/CalloutFigure.astro';
 import Sketch from '../components/Sketch.astro';
+import Showcase from '../components/Showcase.astro';
 import coveCad from '../assets/projects/cove/cad-cutout.png';
+import coveWhiteboard from '../assets/projects/cove/arm-whiteboard.jpg';
+import coveExtended from '../assets/projects/cove/arm-extended.jpg';
+import tetherRender from '../assets/projects/tether/render.png';
+import tetherSim from '../assets/projects/tether/sim-ladder-2.jpg';
+import scramblerHand from '../assets/projects/scrambler/full-hand.jpg';
+import scramblerTest from '../assets/projects/scrambler/test-setup.jpg';
+import id0Robot from '../assets/projects/id0/robot-and-tools.jpg';
+import modulesStacked from '../assets/projects/modular-robots/modules.jpg';
+import modulesAssembled from '../assets/projects/modular-robots/assembled.jpg';
+import skatemoTeam from '../assets/projects/skatemo/team.jpg';
 import { degree, experience, profile } from '../data/site';
 import { dateRange, monthYear } from '../lib/dates';
 import { myPhoto } from '../lib/photos';
-import { Image, getImage } from 'astro:assets';
 import { url } from '../lib/url';
 
-const featured = (await getCollection('projects', (p) => p.data.featured)).sort((a, b) => a.data.order - b.data.order);
-const top = featured.slice(0, 3);
+const entry = async (id: string) => (await getEntry('projects', id))!;
+
+// The showcase at the top: a few images per project, renders and real photos, in this order.
+const showcase = [
+  {
+    project: await entry('cove'),
+    shots: [
+      {
+        src: coveCad,
+        alt: 'CAD render of the Cove 7-DOF robotic arm',
+        caption: 'The CAD model',
+        cutout: true,
+        labels: [
+          { x: 63, y: 9, side: 'left' as const, text: 'End effector at the wrist flange' },
+          { x: 27, y: 56, side: 'left' as const, text: 'Damiao BLDC actuator, one of seven' },
+          { x: 70, y: 52, text: 'Milled aluminum brackets' },
+        ],
+      },
+      { src: coveWhiteboard, alt: 'The assembled Cove arm in front of a whiteboard of planning sketches', caption: 'The real arm, assembled' },
+      { src: coveExtended, alt: 'The arm fully extended in a living room, wired up for testing', caption: 'Fully extended, wired up for testing' },
+    ],
+  },
+  {
+    project: await entry('tether'),
+    shots: [
+      { src: tetherRender, alt: 'Render of Tether hanging from a ladder rung by one end', caption: 'The render' },
+      { src: tetherSim, alt: 'Simulated robot mid-step on the ladder', caption: 'Climbing a ladder in simulation' },
+    ],
+  },
+  {
+    project: await entry('scrambler'),
+    shots: [
+      {
+        src: scramblerHand,
+        alt: 'The Scrambler hand, with ArUco markers on each black finger and a blue wrist cuff',
+        caption: 'The hand',
+        labels: [
+          { x: 64, y: 14, text: 'Cuff that fits the G1 wrist' },
+          { x: 31, y: 66, side: 'left' as const, text: 'ArUco markers for FlexSense' },
+          { x: 64, y: 86, text: 'TPU Fin Ray fingers' },
+        ],
+      },
+      { src: scramblerTest, alt: 'The hand mounted on a test arm at the hackathon, next to a brick', caption: 'Testing at the hackathon' },
+    ],
+  },
+  {
+    project: await entry('id0'),
+    shots: [{ src: id0Robot, alt: 'The ID0 robot next to a vase holding a flower, with printed tools on the floor', caption: 'ID0 and the tools it printed' }],
+  },
+  {
+    project: await entry('modular-robots'),
+    shots: [
+      { src: modulesStacked, alt: 'Three modular robots, one stacked on top of two others', caption: 'Three modules, one stacked' },
+      { src: modulesAssembled, alt: 'Four modules locked together into one larger robot', caption: 'Four modules locked into one robot' },
+    ],
+  },
+  {
+    project: await entry('skatemo'),
+    shots: [{ src: skatemoTeam, alt: 'The SkateMo team holding the skateboard', caption: 'The team and the board' }],
+  },
+];
+
+// Everything not in the showcase goes in the compact list underneath.
+const inShowcase = new Set(showcase.map((s) => s.project.id));
 const rest = await Promise.all(
-  featured.slice(3).map(async (p) => ({
-    project: p,
-    preview: p.data.cover ? (await getImage({ src: p.data.cover, width: 480 })).src : undefined,
-  })),
+  (await getCollection('projects', (p) => !inShowcase.has(p.id)))
+    .sort((a, b) => a.data.order - b.data.order)
+    .map(async (p) => ({
+      project: p,
+      preview: p.data.cover ? (await getImage({ src: p.data.cover, width: 480 })).src : undefined,
+    })),
 );
 ---
 
@@ -68,53 +142,12 @@ const rest = await Promise.all(
 
   <section class="section">
     <Sketch name="gear-pair" width={520} top="-150px" left="-200px" />
+    <Sketch name="module" width={620} top="900px" left="-260px" />
     <div class="section-head">
-      <h2>Latest build: Cove<span class="tagline">7-DOF robotic arm</span></h2>
-      <a href={url('/projects/cove/')}>Read how it works</a>
+      <h2>Things I've built</h2>
+      <a href={url('/projects/')}>See all projects</a>
     </div>
-    <CalloutFigure
-      src={coveCad}
-      alt="CAD render of the Cove 7-DOF robotic arm"
-      callouts={[
-        { x: 64, y: 10, text: 'End effector at the wrist flange' },
-        { x: 79, y: 31, text: 'Damiao BLDC actuator, one of seven, torque-controlled over CAN' },
-        { x: 67, y: 53, text: 'Aluminum brackets: eight parts milled from $308 of stock' },
-        { x: 26, y: 82, side: 'left', text: 'Base mount, where the threads once stripped under load and took out four actuators' },
-      ]}
-    >
-      <p>
-        A 7-DOF arm that a student team at Terra Labs built from scratch in 10 weeks. I designed the control
-        architecture and did the hardware/software integration.
-      </p>
-      <p slot="after" class="note">
-        It runs ROS 2 on a Raspberry Pi 5, with an e-stop that cuts torque if the heartbeat stops. About 50 Nm of torque
-        and 7 kg of payload at full reach. Shown to 200+ people at Demo Day.
-      </p>
-    </CalloutFigure>
-  </section>
-
-  <section class="section">
-    <Sketch name="module" width={620} top="540px" left="-260px" />
-    <Sketch name="arm-schematic" width={520} top="1100px" right="-170px" />
-    <h2>Projects</h2>
-    <p class="lede">Things I've built at work, in clubs, at hackathons, and on my own.</p>
-    <div class="features">
-      {
-        top.map((p, i) => (
-          <a class:list={['feature', { flip: i % 2 === 1 }]} href={url(`/projects/${p.id}/`)}>
-            {p.data.cover && (
-              <Image src={p.data.cover} alt={p.data.coverAlt ?? ''} widths={[600, 900, 1200]} sizes="(max-width: 800px) 100vw, 620px" />
-            )}
-            <div class="ftext">
-              <h3>{p.data.title}</h3>
-              <p class="ftag">{p.data.tagline}</p>
-              <p class="fsum">{p.data.summary}</p>
-              <p class="fctx">{p.data.context}</p>
-            </div>
-          </a>
-        ))
-      }
-    </div>
+    <Showcase items={showcase} />
     <h3 class="more-head">More projects</h3>
     <ul class="compact">
       {
@@ -130,7 +163,6 @@ const rest = await Promise.all(
       }
     </ul>
     <img class="preview" alt="" aria-hidden="true" />
-    <p><a href={url('/projects/')}>See all projects</a></p>
   </section>
 
   <section class="section">
@@ -211,20 +243,6 @@ const rest = await Promise.all(
     max-width: 640px;
   }
 
-  h2 .tagline {
-    font-weight: 400;
-    color: var(--muted);
-  }
-
-  h2 .tagline::before {
-    content: ' – ';
-  }
-
-  .note {
-    font-size: 15px;
-    color: var(--muted);
-  }
-
   .table-scroll {
     overflow-x: auto;
   }
@@ -266,67 +284,6 @@ const rest = await Promise.all(
       gap: 32px;
       padding: 40px 0 56px;
     }
-  }
-
-  /* The top three featured projects get big alternating rows; the rest are a compact list. */
-  .features {
-    border-top: 1.5px solid var(--ink);
-  }
-
-  .feature {
-    display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    gap: 48px;
-    align-items: center;
-    padding: 40px 0;
-    border-bottom: 1px solid var(--rule);
-    text-decoration: none;
-  }
-
-  .feature.flip {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-  }
-
-  .feature.flip img {
-    order: 2;
-  }
-
-  .feature img {
-    width: 100%;
-    aspect-ratio: 3 / 2;
-    object-fit: cover;
-    border: 1px solid var(--ink);
-  }
-
-  .feature h3 {
-    margin: 0;
-    font-size: 30px;
-  }
-
-  .feature:hover h3 {
-    color: var(--accent);
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 4px;
-  }
-
-  .ftag {
-    margin: 4px 0 0;
-    font-size: 19px;
-    color: var(--muted);
-  }
-
-  .fsum {
-    margin: 16px 0 0;
-    font-size: 17px;
-    line-height: 1.6;
-    color: var(--body);
-  }
-
-  .fctx {
-    margin: 16px 0 0;
-    font-size: 15px;
-    color: var(--muted);
   }
 
   .more-head {
@@ -395,16 +352,6 @@ const rest = await Promise.all(
   }
 
   @media (max-width: 800px) {
-    .feature,
-    .feature.flip {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 20px;
-    }
-
-    .feature.flip img {
-      order: 0;
-    }
-
     .compact a {
       grid-template-columns: minmax(0, 1fr);
       gap: 2px;

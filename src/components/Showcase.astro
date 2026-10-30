@@ -1,0 +1,496 @@
+---
+// The home page's project showcase: one big image that steps through a few images per project (renders and
+// photos), with the project's write-up beside it and a row of project names underneath. It plays on its own,
+// pauses while you're pointing at it or it's off screen, and stops for good once you pick something.
+import type { ImageMetadata } from 'astro';
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import { url } from '../lib/url';
+
+interface Label {
+  /** Where the leader line points, as % of the image width/height. */
+  x: number;
+  y: number;
+  /** Which side of the point the text sits on. */
+  side?: 'left' | 'right';
+  text: string;
+}
+
+interface Shot {
+  src: ImageMetadata;
+  alt: string;
+  /** A few words under the write-up saying what this image is. */
+  caption: string;
+  /** A render with a transparent background: no frame, so it sits on the grid. */
+  cutout?: boolean;
+  labels?: Label[];
+}
+
+interface Props {
+  items: { project: CollectionEntry<'projects'>; shots: Shot[] }[];
+}
+
+const { items } = Astro.props;
+
+// The stage is 4:3. Each image is fitted inside it without cropping, so its labels stay on the right spot.
+const STAGE = 4 / 3;
+const fit = (s: Shot) => {
+  const a = s.src.width / s.src.height;
+  return `width: ${Math.min(100, (a / STAGE) * 100).toFixed(2)}%; aspect-ratio: ${s.src.width} / ${s.src.height}`;
+};
+---
+
+<div class="showcase" data-showcase>
+  <div class="panel">
+    <div class="stage grid-paper">
+      {
+        items.map(({ project, shots }, p) =>
+          shots.map((s, i) => (
+            <div class:list={['slide', { on: p === 0 && i === 0 }]} data-p={p} data-i={i} data-caption={s.caption}>
+              <div class:list={['frame', { cutout: s.cutout }]} style={fit(s)}>
+                <Image
+                  src={s.src}
+                  alt={s.alt}
+                  widths={[480, 800, 1200]}
+                  sizes="(max-width: 900px) 100vw, 680px"
+                  loading={p === 0 && i === 0 ? 'eager' : 'lazy'}
+                />
+                {s.labels?.map((l) => (
+                  <span class:list={['label', l.side ?? 'right']} style={`left: ${l.x}%; top: ${l.y}%`} aria-hidden="true">
+                    <span class="dot" />
+                    <span class="leader" />
+                    <span class="text">{l.text}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )),
+        )
+      }
+      <a class="hit" href={url(`/projects/${items[0].project.id}/`)} aria-label={`Read about ${items[0].project.data.title}`}></a>
+      <button type="button" class="step prev" aria-label="Previous image">←</button>
+      <button type="button" class="step next" aria-label="Next image">→</button>
+      <span class="count">1 of {items[0].shots.length}</span>
+    </div>
+    <div class="side">
+      {
+        items.map(({ project, shots }, p) => (
+          <div class="about" data-p={p} hidden={p !== 0}>
+            <h3>
+              <a href={url(`/projects/${project.id}/`)}>{project.data.title}</a>
+            </h3>
+            <p class="tag">{project.data.tagline}</p>
+            <p class="sum">{project.data.summary}</p>
+            <p class="ctx">{project.data.context}</p>
+            <p class="read">
+              <a href={url(`/projects/${project.id}/`)}>Read how it works</a>
+            </p>
+          </div>
+        ))
+      }
+      <p class="caption" aria-live="polite">{items[0].shots[0].caption}</p>
+    </div>
+  </div>
+  <div class="tabs">
+    {
+      items.map(({ project }, p) => (
+        <button type="button" class:list={['tab', { on: p === 0 }]} data-p={p} aria-pressed={p === 0 ? 'true' : 'false'}>
+          <span class="track">
+            <span class="fill" />
+          </span>
+          {project.data.title}
+        </button>
+      ))
+    }
+  </div>
+</div>
+
+<script>
+  const SHOW_MS = 5000;
+
+  document.querySelectorAll<HTMLElement>('[data-showcase]').forEach((root) => {
+    const stage = root.querySelector<HTMLElement>('.stage')!;
+    const hit = root.querySelector<HTMLAnchorElement>('.hit')!;
+    const slides = [...root.querySelectorAll<HTMLElement>('.slide')];
+    const abouts = [...root.querySelectorAll<HTMLElement>('.about')];
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('.tab')];
+    const fills = tabs.map((t) => t.querySelector<HTMLElement>('.fill')!);
+    const caption = root.querySelector<HTMLElement>('.caption')!;
+    const count = root.querySelector<HTMLElement>('.count')!;
+    const projectOf = (n: number) => Number(slides[n].dataset.p);
+    const shotsIn = (p: number) => slides.filter((s) => Number(s.dataset.p) === p).length;
+
+    let cur = 0;
+    let elapsed = 0;
+    // Autoplay is off for good once someone picks a project or steps through images, or if they've asked
+    // their system for less motion.
+    let playing = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let hovered = false;
+    let visible = true;
+
+    function show(n: number) {
+      cur = (n + slides.length) % slides.length;
+      elapsed = 0;
+      const p = projectOf(cur);
+      const i = Number(slides[cur].dataset.i);
+      slides.forEach((s, k) => s.classList.toggle('on', k === cur));
+      abouts.forEach((a, k) => (a.hidden = k !== p));
+      tabs.forEach((t, k) => {
+        t.classList.toggle('on', k === p);
+        t.setAttribute('aria-pressed', String(k === p));
+      });
+      const title = abouts[p].querySelector('a')!;
+      hit.href = title.href;
+      hit.setAttribute('aria-label', `Read about ${title.textContent}`);
+      caption.textContent = slides[cur].dataset.caption!;
+      count.textContent = `${i + 1} of ${shotsIn(p)}`;
+      paint();
+    }
+
+    // The blue line over the current project fills up across its images.
+    function paint() {
+      const p = projectOf(cur);
+      const i = Number(slides[cur].dataset.i);
+      const done = playing ? i + Math.min(elapsed / SHOW_MS, 1) : i + 1;
+      fills.forEach((f, k) => (f.style.transform = `scaleX(${k === p ? done / shotsIn(p) : 0})`));
+    }
+
+    function stop() {
+      playing = false;
+      paint();
+    }
+
+    let last = performance.now();
+    function tick(now: number) {
+      // Cap the step so coming back to a background tab doesn't skip ahead, but loosely enough that a
+      // throttled tab drawing only a frame or two a second still keeps time.
+      const dt = Math.min(now - last, 1000);
+      last = now;
+      if (playing && !hovered && visible) {
+        elapsed += dt;
+        if (elapsed >= SHOW_MS) show(cur + 1);
+        else paint();
+      }
+      if (playing) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+
+    new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.4 }).observe(stage);
+    root.addEventListener('pointerenter', () => (hovered = true));
+    root.addEventListener('pointerleave', () => (hovered = false));
+    root.addEventListener('focusin', () => (hovered = true));
+    root.addEventListener('focusout', () => (hovered = false));
+
+    tabs.forEach((t, p) =>
+      t.addEventListener('click', () => {
+        stop();
+        show(slides.findIndex((s) => Number(s.dataset.p) === p));
+      }),
+    );
+    root.querySelector('.prev')!.addEventListener('click', () => {
+      stop();
+      show(cur - 1);
+    });
+    root.querySelector('.next')!.addEventListener('click', () => {
+      stop();
+      show(cur + 1);
+    });
+    root.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      e.preventDefault();
+      stop();
+      show(cur + (e.key === 'ArrowRight' ? 1 : -1));
+    });
+  });
+</script>
+
+<style>
+  .panel {
+    display: flex;
+    flex-wrap: wrap;
+    border: 1px solid var(--ink);
+  }
+
+  .stage {
+    position: relative;
+    flex: 999 1 560px;
+    min-width: 0;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-right: 1px solid var(--ink);
+  }
+
+  /* Insetting by the same % on every side keeps the slide 4:3, which fit() in the frontmatter relies on. */
+  .slide {
+    position: absolute;
+    inset: 5%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.7s ease,
+      visibility 0s 0.7s;
+  }
+
+  .slide.on {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.7s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slide,
+    .slide.on {
+      transition: none;
+    }
+  }
+
+  .frame {
+    position: relative;
+    max-height: 100%;
+  }
+
+  .frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .frame:not(.cutout) img {
+    border: 1px solid var(--ink);
+  }
+
+  .label {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    transform: translateY(-50%);
+  }
+
+  .label.left {
+    flex-direction: row-reverse;
+    transform: translate(-100%, -50%);
+  }
+
+  .dot {
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+
+  .leader {
+    flex: none;
+    width: 36px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .text {
+    width: max-content;
+    max-width: 170px;
+    padding: 3px 8px;
+    border: 1px solid var(--accent);
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .side {
+    flex: 1 1 320px;
+    min-width: 0;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .about h3 {
+    margin: 0;
+    font-size: 30px;
+  }
+
+  .about h3 a {
+    text-decoration: none;
+  }
+
+  .about h3 a:hover {
+    text-decoration: underline;
+  }
+
+  .about p {
+    margin: 0;
+  }
+
+  .tag {
+    margin-top: 4px !important;
+    font-size: 19px;
+    color: var(--muted);
+  }
+
+  .sum {
+    margin-top: 16px !important;
+    color: var(--body);
+  }
+
+  .ctx {
+    margin-top: 12px !important;
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .read {
+    margin-top: 16px !important;
+  }
+
+  .caption {
+    margin: 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  /* The whole image links to the project; the arrows and counter sit on top of it. */
+  .hit {
+    position: absolute;
+    inset: 0;
+  }
+
+  .step {
+    position: absolute;
+    top: 50%;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--ink);
+    background: var(--bg);
+    color: var(--ink);
+    font: inherit;
+    font-size: 18px;
+    cursor: pointer;
+    transform: translateY(-50%);
+  }
+
+  .step:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .prev {
+    left: 12px;
+  }
+
+  .next {
+    right: 12px;
+  }
+
+  .count {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    padding: 1px 10px;
+    border: 1px solid var(--rule);
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  /* One name per project. The line over each is a progress bar while it plays. */
+  .tabs {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .tab {
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    font-size: 16px;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .tab:hover,
+  .tab.on {
+    color: var(--ink);
+  }
+
+  .tab.on {
+    font-weight: 600;
+  }
+
+  .track {
+    display: block;
+    height: 2px;
+    margin-bottom: 10px;
+    background: var(--rule);
+    overflow: hidden;
+  }
+
+  .fill {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  @media (max-width: 900px) {
+    .stage {
+      border-right: none;
+      border-bottom: 1px solid var(--ink);
+    }
+
+    /* Six names don't fit across a narrow screen without wrapping, so they scroll sideways. */
+    .tabs {
+      grid-auto-columns: max-content;
+      gap: 24px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .side {
+      padding: 20px 16px;
+    }
+
+    .about h3 {
+      font-size: 26px;
+    }
+
+    /* Labels don't fit around an image this small without running off the edge. */
+    .label {
+      display: none;
+    }
+
+    .step {
+      width: 34px;
+      height: 34px;
+      font-size: 16px;
+    }
+
+    .prev {
+      left: 8px;
+    }
+
+    .next {
+      right: 8px;
+    }
+  }
+</style>
