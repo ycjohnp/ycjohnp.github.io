@@ -8,6 +8,8 @@ cover: ../../assets/projects/cove/arm-whiteboard.jpg
 coverAlt: The assembled Cove arm in front of a whiteboard of planning sketches
 video:
   src: media/cove.mp4
+  width: 480
+  height: 854
   poster: media/cove-poster.jpg
   caption: Cove moving under ROS 2 control
 gallery:

@@ -37,90 +37,98 @@ const placed = (sketches.length ? sketches : fallback).map((name, i, all) => ({
   width: [560, 500, 600][i % 3],
 }));
 const { Content } = await render(project);
+
+// The gallery lays every item out at its own shape (see .gallery below), so each one needs its
+// width / height ratio up front.
+const media = [
+  ...(youtube ? [{ kind: 'youtube' as const, ratio: 16 / 9, caption: youtube.caption }] : []),
+  ...(video ? [{ kind: 'video' as const, ratio: video.width / video.height, caption: video.caption }] : []),
+  ...gallery.map((img) => ({ kind: 'image' as const, ratio: img.src.width / img.src.height, caption: img.caption, img })),
+];
 ---
 
 <Base title={`${title}: ${tagline}`} description={summary} image={cardFor(project.id) ?? cover} imageAlt={coverAlt} current="projects">
   <article class="project">
     {placed.map((p) => <Sketch name={p.name} width={p.width} top={p.top} {...p.side} />)}
-    <p class="crumb"><a href={url('/projects/')}>Projects</a></p>
-    <h1>{title}<span class="tagline">{tagline}</span></h1>
-    <p class="big">{summary}</p>
+    <div class="top">
+      <div class="lead">
+        <p class="crumb"><a href={url('/projects/')}>Projects</a></p>
+        <h1>{title}<span class="tagline">{tagline}</span></h1>
+        <p class="big">{summary}</p>
+      </div>
+      {
+        (facts.length > 0 || links.length > 0) && (
+          <div class="meta">
+            {facts.length > 0 && (
+              <dl class="facts">
+                {facts.map((f) => (
+                  <div>
+                    <dt>{f.label}</dt>
+                    <dd>{f.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+            {links.length > 0 && (
+              <ul class="links">
+                {links.map((l) => (
+                  <li>
+                    <a href={l.href}>{l.label}</a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )
+      }
+    </div>
 
     {
-      (gallery.length > 0 || video || youtube) && (
+      media.length > 0 && (
         <div class="gallery">
-          {youtube && (
-            <figure>
-              <iframe
-                class="video"
-                src={`https://www.youtube-nocookie.com/embed/${youtube.id}?rel=0`}
-                title={youtube.title}
-                loading="lazy"
-                allow="encrypted-media; picture-in-picture; fullscreen"
-                referrerpolicy="strict-origin-when-cross-origin"
-                allowfullscreen
-              />
-              {youtube.caption && <figcaption>{youtube.caption}</figcaption>}
-            </figure>
-          )}
-          {video && (
-            <figure>
-              <video
-                class="video"
-                src={url(video.src)}
-                poster={video.poster && url(video.poster)}
-                controls
-                muted
-                playsinline
-                preload="metadata"
-              />
-              {video.caption && <figcaption>{video.caption}</figcaption>}
-            </figure>
-          )}
-          {gallery.map((img) => (
-            <figure>
-              <Image src={img.src} alt={img.alt} widths={[600, 900, 1200]} sizes="(max-width: 900px) 100vw, 560px" />
-              {img.caption && <figcaption>{img.caption}</figcaption>}
+          {media.map((m) => (
+            <figure style={`--a: ${m.ratio.toFixed(4)}`}>
+              {m.kind === 'youtube' && (
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${youtube!.id}?rel=0`}
+                  title={youtube!.title}
+                  loading="lazy"
+                  allow="encrypted-media; picture-in-picture; fullscreen"
+                  referrerpolicy="strict-origin-when-cross-origin"
+                  allowfullscreen
+                />
+              )}
+              {m.kind === 'video' && (
+                <video src={url(video!.src)} poster={video!.poster && url(video!.poster)} controls muted playsinline preload="metadata" />
+              )}
+              {m.kind === 'image' && (
+                <Image src={m.img.src} alt={m.img.alt} widths={[600, 900, 1200]} sizes="(max-width: 640px) 100vw, 560px" />
+              )}
+              {m.caption && <figcaption>{m.caption}</figcaption>}
             </figure>
           ))}
         </div>
       )
     }
 
-    {
-      facts.length > 0 && (
-        <dl class="facts">
-          {facts.map((f) => (
-            <div>
-              <dt>{f.label}</dt>
-              <dd>{f.value}</dd>
-            </div>
-          ))}
-        </dl>
-      )
-    }
-
-    {
-      links.length > 0 && (
-        <ul class="links">
-          {links.map((l) => (
-            <li>
-              <a href={l.href}>{l.label}</a>
-            </li>
-          ))}
-        </ul>
-      )
-    }
-
     <div class="prose">
       <Content />
     </div>
+
+    <!-- Filled in and opened by the script below when a photo is clicked. -->
+    <dialog class="lightbox" aria-label="Enlarged photo">
+      <figure>
+        <img alt="" />
+        <figcaption></figcaption>
+      </figure>
+      <button type="button" class="close">Close</button>
+    </dialog>
   </article>
 
   <nav class="pager" aria-label="More projects">
     {
       prev ? (
-        <a href={url(`/projects/${prev.id}/`)}>
+        <a class="prev" href={url(`/projects/${prev.id}/`)}>
           <span>Previous</span>
           {prev.data.title}
           <span>{prev.data.tagline}</span>
@@ -129,21 +137,77 @@ const { Content } = await render(project);
         <span />
       )
     }
+    <a class="all" href={url('/projects/')}>All projects</a>
     {
-      next && (
+      next ? (
         <a class="next" href={url(`/projects/${next.id}/`)}>
           <span>Next</span>
           {next.data.title}
           <span>{next.data.tagline}</span>
         </a>
+      ) : (
+        <span />
       )
     }
   </nav>
+
+  <script>
+    // Click a photo to see it large. Each photo in the gallery and the write-up is wrapped in a button, and
+    // the button opens the one <dialog> on the page with that photo in it. Escape, the Close button, or a
+    // click anywhere off the photo closes it, and the browser puts focus back on the photo's button.
+    const dialog = document.querySelector<HTMLDialogElement>('.lightbox');
+    if (dialog) {
+      const big = dialog.querySelector('img')!;
+      const note = dialog.querySelector('figcaption')!;
+
+      // The largest file a photo offers: the widest entry in its srcset, or its src when it has none.
+      const largest = (img: HTMLImageElement) => {
+        const widest = img.srcset
+          .split(/,\s+/)
+          .map((entry) => entry.trim().split(/\s+/))
+          .filter(([href]) => href)
+          .sort((a, b) => parseFloat(b[1]) - parseFloat(a[1]))[0];
+        return widest ? widest[0] : img.src;
+      };
+
+      document.querySelectorAll<HTMLImageElement>('.gallery img, .prose img').forEach((img) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'zoom';
+        button.setAttribute('aria-label', `Enlarge photo: ${img.alt}`);
+        img.replaceWith(button);
+        button.append(img);
+        button.addEventListener('click', () => {
+          // The caption under the photo (in the write-up, one caption can cover a row of photos), or else
+          // the photo's description.
+          const caption = img.closest('figure')?.querySelector('figcaption') ?? img.closest('p')?.querySelector('em');
+          big.src = largest(img);
+          big.alt = img.alt;
+          note.textContent = caption?.textContent?.trim() || img.alt;
+          dialog.showModal();
+        });
+      });
+
+      dialog.addEventListener('click', (e) => {
+        if (e.target !== big) dialog.close();
+      });
+      // Empty it, so the next photo doesn't open showing this one while it loads.
+      dialog.addEventListener('close', () => big.removeAttribute('src'));
+    }
+  </script>
 </Base>
 
 <style>
   .project {
     padding: 48px 0 0;
+  }
+
+  /* The title and summary, with the facts beside them on a wide screen and under them on a narrow one. */
+  .top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    margin-bottom: 40px;
   }
 
   .crumb {
@@ -152,8 +216,14 @@ const { Content } = await render(project);
     color: var(--muted);
   }
 
+  .crumb a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
   h1 {
-    margin: 12px 0 20px;
+    margin: 4px 0 20px;
     font-size: clamp(40px, 6vw, 56px);
     letter-spacing: -0.02em;
   }
@@ -169,18 +239,63 @@ const { Content } = await render(project);
   }
 
   .big {
-    margin: 0 0 40px;
+    margin: 0;
     max-width: 720px;
   }
 
+  .facts {
+    max-width: 820px;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  @media (min-width: 960px) {
+    .top {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+      gap: 56px;
+      align-items: start;
+    }
+
+    /* Starts level with the title, below the "Projects" link. */
+    .meta {
+      padding-top: 62px;
+    }
+
+    .meta .facts div {
+      grid-template-columns: 96px minmax(0, 1fr);
+    }
+  }
+
+  /* Every item keeps its own shape. Each one's starting width and its share of spare room are both in
+     proportion to its width / height ratio (--a), which makes everything on a line come out the same
+     height, however many fit. --h is roughly the shortest a line gets before it wraps, and nothing grows
+     taller than 460px, so a lone photo doesn't fill the page. */
   .gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+    --h: 200px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
     gap: 16px;
     margin-bottom: 40px;
   }
 
   .gallery figure {
+    flex: var(--a) 1 calc(var(--a) * var(--h));
+    max-width: calc(var(--a) * 460px);
+    min-width: 0;
     margin: 0;
   }
 
@@ -189,8 +304,9 @@ const { Content } = await render(project);
   .gallery iframe {
     display: block;
     width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: contain;
+    height: auto;
+    aspect-ratio: var(--a);
+    object-fit: cover;
     background: var(--bg);
     border: 1px solid var(--ink);
   }
@@ -206,31 +322,48 @@ const { Content } = await render(project);
     color: var(--muted);
   }
 
-  .facts {
-    max-width: 820px;
-  }
-
-  .links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 24px;
-    margin: 20px 0 0;
+  /* The button the script wraps around each photo. */
+  .project :global(.zoom) {
+    display: block;
+    width: 100%;
     padding: 0;
-    list-style: none;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: zoom-in;
   }
 
-  .links a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-  }
-
+  /* Text keeps a comfortable line length; rows of photos get to run wider. */
   .prose {
-    max-width: 700px;
-    padding: 24px 0 64px;
+    padding: 0 0 64px;
     font-size: 18px;
     line-height: 1.7;
     color: var(--body);
+  }
+
+  .prose > :global(*) {
+    max-width: 700px;
+  }
+
+  .prose > :global(p:has(> img:nth-of-type(2), > .zoom:nth-of-type(2))) {
+    max-width: none;
+  }
+
+  /* On a wide screen a row of three fills the page, and a row of two takes two thirds of it, so photos
+     come out the same size in both. */
+  @media (min-width: 960px) {
+    .prose > :global(p:has(> img:nth-of-type(2), > .zoom:nth-of-type(2))) {
+      max-width: calc((100% - 24px) * 2 / 3 + 12px);
+    }
+
+    .prose > :global(p:has(> img:nth-of-type(3), > .zoom:nth-of-type(3))) {
+      max-width: none;
+    }
+  }
+
+  .prose > :global(:first-child) {
+    margin-top: 0;
   }
 
   .prose :global(h2) {
@@ -254,7 +387,7 @@ const { Content } = await render(project);
 
   /* In Markdown, images on consecutive lines sit side by side, and an *italic* line
      directly under them becomes the caption. */
-  .prose :global(p:has(> img)) {
+  .prose :global(p:has(img)) {
     display: flex;
     flex-wrap: wrap;
     /* Without this, flex stretches every image to the tallest one's height. */
@@ -263,28 +396,129 @@ const { Content } = await render(project);
     margin: 28px 0;
   }
 
-  .prose :global(p:has(> img) img) {
+  .prose :global(p:has(img) > img),
+  .prose :global(p:has(img) > .zoom) {
     flex: 1 1 220px;
+    width: auto;
     min-width: 0;
+  }
+
+  .prose :global(p:has(img) img) {
+    width: 100%;
     height: auto;
     border: 1px solid var(--ink);
   }
 
-  .prose :global(p:has(> img) em) {
+  .prose :global(p:has(img) em) {
     flex-basis: 100%;
     font-size: 14px;
     color: var(--muted);
   }
 
-  .pager {
+  @media (max-width: 640px) {
+    .gallery {
+      --h: 180px;
+      gap: 12px;
+    }
+
+    /* Two photos to a row, so a long write-up isn't one tall photo after another. Tap one to see it large. */
+    .prose :global(p:has(img) > img),
+    .prose :global(p:has(img) > .zoom) {
+      flex-basis: 140px;
+    }
+
+    .prose :global(p:has(img)) {
+      gap: 8px;
+    }
+  }
+
+  /* Covers the window with a wash of the page color, with the photo centered on it. */
+  .lightbox {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 68px 24px 24px;
+    border: none;
+    background: color-mix(in srgb, var(--bg) 95%, transparent);
+    color: var(--ink);
+    cursor: zoom-out;
+  }
+
+  .lightbox[open] {
     display: flex;
-    justify-content: space-between;
-    gap: 16px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lightbox::backdrop {
+    background: none;
+  }
+
+  .lightbox figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .lightbox img {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: calc(100dvh - 170px);
+    border: 1px solid var(--ink);
+    background: var(--bg);
+    filter: none;
+    cursor: default;
+  }
+
+  .lightbox figcaption {
+    max-width: 640px;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid var(--ink);
+    background: var(--bg);
+    color: var(--ink);
+    font: inherit;
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  .close:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* The page behind doesn't scroll while a photo is open. */
+  :global(html:has(.lightbox[open])) {
+    overflow: hidden;
+  }
+
+  .pager {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 16px 24px;
+    align-items: start;
     padding: 32px 0 72px;
     border-top: 1px solid var(--rule);
   }
 
-  .pager a {
+  .prev,
+  .next {
     display: flex;
     flex-direction: column;
     font-size: 21px;
@@ -292,13 +526,39 @@ const { Content } = await render(project);
     text-decoration: none;
   }
 
-  .pager a span {
+  .prev span,
+  .next span {
     font-size: 14px;
     font-weight: 400;
     color: var(--muted);
   }
 
-  .pager .next {
+  .next {
+    grid-column: 3;
     text-align: right;
+  }
+
+  .all {
+    grid-column: 2;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  /* Phones: previous and next share a row, and the link back to the list goes under them. */
+  @media (max-width: 640px) {
+    .pager {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .next {
+      grid-column: 2;
+    }
+
+    .all {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      justify-self: start;
+    }
   }
 </style>

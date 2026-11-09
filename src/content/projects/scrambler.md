@@ -9,6 +9,8 @@ cover: ../../assets/projects/scrambler/full-hand.jpg
 coverAlt: The Scrambler hand, with ArUco markers on each black finger and a blue wrist cuff
 video:
   src: media/scrambler-live-tool.mp4
+  width: 1280
+  height: 572
   poster: media/scrambler-live-tool-poster.jpg
   caption: FlexSense running live, flagging a finger that bends backward
 gallery:

@@ -9,6 +9,8 @@ cover: ../../assets/projects/tether/render.png
 coverAlt: Render of Tether hanging from a ladder rung by one end
 video:
   src: media/tether-sim.mp4
+  width: 1280
+  height: 890
   poster: media/tether-sim-poster.jpg
   caption: Tether climbing from the ground onto a ladder in the team's simulator
 gallery:

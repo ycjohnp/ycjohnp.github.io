@@ -22,8 +22,17 @@ const projects = defineCollection({
       gallery: z
         .array(z.object({ src: image(), alt: z.string(), caption: z.string().optional() }))
         .default([]),
-      /** A video in public/, shown first in the gallery. Paths are relative to public/. */
-      video: z.object({ src: z.string(), poster: z.string().optional(), caption: z.string().optional() }).optional(),
+      /** A video in public/, shown first in the gallery. Paths are relative to public/. `width` and `height`
+          are the video's own pixel size, so the page can lay it out at its real shape before it loads. */
+      video: z
+        .object({
+          src: z.string(),
+          width: z.number(),
+          height: z.number(),
+          poster: z.string().optional(),
+          caption: z.string().optional(),
+        })
+        .optional(),
       /** A YouTube video, embedded first in the gallery. `id` is the part after watch?v= in its URL. */
       youtube: z.object({ id: z.string(), title: z.string(), caption: z.string().optional() }).optional(),
       facts: z.array(z.object({ label: z.string(), value: z.string() })).default([]),
