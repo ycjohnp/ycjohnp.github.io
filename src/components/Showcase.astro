@@ -1,7 +1,8 @@
 ---
 // The home page's project showcase: one big image that steps through a few images per project (renders and
-// photos), with the project's write-up beside it and a row of project names underneath. It plays on its own,
-// pauses while you're pointing at it or it's off screen, and stops for good once you pick something.
+// photos), with the project's write-up beside it, a row of controls (previous, next, pause) and a row of
+// project names underneath. It plays on its own, pauses while you're pointing at it or it's off screen, and
+// stops once you pick something, until you press play again.
 import type { ImageMetadata } from 'astro';
 import type { CollectionEntry } from 'astro:content';
 import { Image } from 'astro:assets';
@@ -19,7 +20,7 @@ interface Label {
 interface Shot {
   src: ImageMetadata;
   alt: string;
-  /** A few words under the write-up saying what this image is. */
+  /** A few words next to the controls saying what this image is. */
   caption: string;
   /** A render with a transparent background: no frame, so it sits on the grid. */
   cutout?: boolean;
@@ -52,7 +53,7 @@ const fit = (s: Shot) => {
                   src={s.src}
                   alt={s.alt}
                   widths={[480, 800, 1200]}
-                  sizes="(max-width: 900px) 100vw, 680px"
+                  sizes="(max-width: 960px) 100vw, 700px"
                   loading={p === 0 && i === 0 ? 'eager' : 'lazy'}
                 />
                 {s.labels?.map((l) => (
@@ -67,28 +68,57 @@ const fit = (s: Shot) => {
           )),
         )
       }
-      <a class="hit" href={url(`/projects/${items[0].project.id}/`)} aria-label={`Read about ${items[0].project.data.title}`}></a>
-      <button type="button" class="step prev" aria-label="Previous image">←</button>
-      <button type="button" class="step next" aria-label="Next image">→</button>
-      <span class="count">1 of {items[0].shots.length}</span>
+      <a
+        class="hit"
+        href={url(`/projects/${items[0].project.id}/`)}
+        aria-label={`Read about ${items[0].project.data.title}`}
+        draggable="false"></a>
     </div>
     <div class="side">
-      {
-        items.map(({ project, shots }, p) => (
-          <div class="about" data-p={p} hidden={p !== 0}>
-            <h3>
-              <a href={url(`/projects/${project.id}/`)}>{project.data.title}</a>
-            </h3>
-            <p class="tag">{project.data.tagline}</p>
-            <p class="sum">{project.data.summary}</p>
-            <p class="ctx">{project.data.context}</p>
-            <p class="read">
-              <a href={url(`/projects/${project.id}/`)}>Read how it works</a>
-            </p>
-          </div>
-        ))
-      }
-      <p class="caption" aria-live="polite">{items[0].shots[0].caption}</p>
+      <div class="abouts">
+        {
+          items.map(({ project }, p) => (
+            <div class:list={['about', { on: p === 0 }]} data-p={p} inert={p !== 0}>
+              <h3>
+                <a href={url(`/projects/${project.id}/`)}>{project.data.title}</a>
+              </h3>
+              <p class="tag">{project.data.tagline}</p>
+              <p class="sum">{project.data.summary}</p>
+              <p class="ctx">{project.data.context}</p>
+              <p class="read">
+                <a href={url(`/projects/${project.id}/`)}>Read how it works</a>
+              </p>
+            </div>
+          ))
+        }
+      </div>
+      <div class="bar">
+        <div class="captions">
+          {
+            items.map(({ shots }) =>
+              shots.map((s) => (
+                <span class="sizer" aria-hidden="true">
+                  {s.caption}
+                </span>
+              )),
+            )
+          }
+          <p class="caption" aria-live="off">{items[0].shots[0].caption}</p>
+        </div>
+        <div class="controls">
+          <button type="button" class="ctl prev" aria-label="Previous image">←</button>
+          <span class="count">1 of {items[0].shots.length}</span>
+          <button type="button" class="ctl next" aria-label="Next image">→</button>
+          <button type="button" class="ctl toggle" aria-label="Play slideshow">
+            <svg class="icon-pause" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+              <path d="M5.5 3.5v9M10.5 3.5v9" />
+            </svg>
+            <svg class="icon-play" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+              <path d="M5.5 3.5l7 4.5-7 4.5z" />
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
   <div class="tabs">
@@ -107,6 +137,8 @@ const fit = (s: Shot) => {
 
 <script>
   const SHOW_MS = 5000;
+  // How far a finger has to travel sideways on the image to count as a swipe.
+  const SWIPE_PX = 40;
 
   document.querySelectorAll<HTMLElement>('[data-showcase]').forEach((root) => {
     const stage = root.querySelector<HTMLElement>('.stage')!;
@@ -117,15 +149,17 @@ const fit = (s: Shot) => {
     const fills = tabs.map((t) => t.querySelector<HTMLElement>('.fill')!);
     const caption = root.querySelector<HTMLElement>('.caption')!;
     const count = root.querySelector<HTMLElement>('.count')!;
+    const toggle = root.querySelector<HTMLButtonElement>('.toggle')!;
     const projectOf = (n: number) => Number(slides[n].dataset.p);
     const shotsIn = (p: number) => slides.filter((s) => Number(s.dataset.p) === p).length;
 
     let cur = 0;
     let elapsed = 0;
-    // Autoplay is off for good once someone picks a project or steps through images, or if they've asked
-    // their system for less motion.
+    // Autoplay stops once someone picks a project or steps through images, and starts again only if they
+    // press play. It starts out stopped if they've asked their system for less motion.
     let playing = !matchMedia('(prefers-reduced-motion: reduce)').matches;
     let hovered = false;
+    let focused = false;
     let visible = true;
 
     function show(n: number) {
@@ -134,7 +168,11 @@ const fit = (s: Shot) => {
       const p = projectOf(cur);
       const i = Number(slides[cur].dataset.i);
       slides.forEach((s, k) => s.classList.toggle('on', k === cur));
-      abouts.forEach((a, k) => (a.hidden = k !== p));
+      // The write-ups are stacked in one spot (see .abouts), so the others are hidden rather than removed.
+      abouts.forEach((a, k) => {
+        a.classList.toggle('on', k === p);
+        a.inert = k !== p;
+      });
       tabs.forEach((t, k) => {
         t.classList.toggle('on', k === p);
         t.setAttribute('aria-pressed', String(k === p));
@@ -155,31 +193,57 @@ const fit = (s: Shot) => {
       fills.forEach((f, k) => (f.style.transform = `scaleX(${k === p ? done / shotsIn(p) : 0})`));
     }
 
-    function stop() {
-      playing = false;
+    // The button shows pause while it plays and play while it's stopped. A screen reader is told about a new
+    // caption only when it's stopped, so it isn't interrupted every five seconds by the slideshow.
+    function sync() {
+      root.toggleAttribute('data-playing', playing);
+      toggle.setAttribute('aria-label', playing ? 'Pause slideshow' : 'Play slideshow');
+      caption.setAttribute('aria-live', playing ? 'off' : 'polite');
       paint();
     }
 
-    let last = performance.now();
+    function stop() {
+      playing = false;
+      sync();
+    }
+
+    let last = 0;
+    let frame = 0;
     function tick(now: number) {
       // Cap the step so coming back to a background tab doesn't skip ahead, but loosely enough that a
       // throttled tab drawing only a frame or two a second still keeps time.
       const dt = Math.min(now - last, 1000);
       last = now;
-      if (playing && !hovered && visible) {
+      if (playing && !hovered && !focused && visible) {
         elapsed += dt;
         if (elapsed >= SHOW_MS) show(cur + 1);
         else paint();
       }
-      if (playing) requestAnimationFrame(tick);
+      frame = playing ? requestAnimationFrame(tick) : 0;
     }
-    requestAnimationFrame(tick);
+
+    function play() {
+      playing = true;
+      elapsed = 0;
+      // The pointer or the focus is on the play button right now. Don't let that hold the slideshow still;
+      // pointing at it or tabbing into it again pauses it as usual.
+      hovered = focused = false;
+      sync();
+      if (!frame) {
+        last = performance.now();
+        frame = requestAnimationFrame(tick);
+      }
+    }
+
+    if (playing) play();
+    else sync();
 
     new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.4 }).observe(stage);
     root.addEventListener('pointerenter', () => (hovered = true));
     root.addEventListener('pointerleave', () => (hovered = false));
-    root.addEventListener('focusin', () => (hovered = true));
-    root.addEventListener('focusout', () => (hovered = false));
+    // Only keyboard focus pauses it. A button keeps the focus after a click or a tap, and that shouldn't.
+    root.addEventListener('focusin', (e) => (focused = (e.target as Element).matches(':focus-visible')));
+    root.addEventListener('focusout', () => (focused = false));
 
     tabs.forEach((t, p) =>
       t.addEventListener('click', () => {
@@ -195,11 +259,41 @@ const fit = (s: Shot) => {
       stop();
       show(cur + 1);
     });
+    toggle.addEventListener('click', () => (playing ? stop() : play()));
     root.addEventListener('keydown', (e) => {
       if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
       e.preventDefault();
       stop();
       show(cur + (e.key === 'ArrowRight' ? 1 : -1));
+    });
+
+    // Swiping sideways on the image steps through the images. Up-and-down movement is left to the browser
+    // for scrolling the page (touch-action: pan-y on .stage), which cancels the pointer before pointerup.
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+    let swiped = false;
+    stage.addEventListener('pointerdown', (e) => {
+      swiped = false;
+      tracking = e.pointerType !== 'mouse';
+      startX = e.clientX;
+      startY = e.clientY;
+    });
+    stage.addEventListener('pointerup', (e) => {
+      if (!tracking) return;
+      tracking = false;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (Math.abs(dx) < SWIPE_PX || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+      swiped = true;
+      stop();
+      show(cur + (dx < 0 ? 1 : -1));
+    });
+    stage.addEventListener('pointercancel', () => (tracking = false));
+    // The image is a link to the project. A swipe that ends on it shouldn't also follow the link.
+    hit.addEventListener('click', (e) => {
+      if (swiped) e.preventDefault();
+      swiped = false;
     });
   });
 </script>
@@ -207,17 +301,20 @@ const fit = (s: Shot) => {
 <style>
   .panel {
     display: flex;
-    flex-wrap: wrap;
     border: 1px solid var(--ink);
   }
 
   .stage {
     position: relative;
-    flex: 999 1 560px;
+    flex: 1 1 0;
     min-width: 0;
     aspect-ratio: 4 / 3;
     overflow: hidden;
     border-right: 1px solid var(--ink);
+    /* Sideways drags are swipes (see the script); up-and-down ones still scroll the page. */
+    touch-action: pan-y;
+    /* Lets the labels ask how wide the stage is (see the @container rule below). */
+    container-type: inline-size;
   }
 
   /* Insetting by the same % on every side keeps the slide 4:3, which fit() in the frontmatter relies on. */
@@ -301,14 +398,42 @@ const fit = (s: Shot) => {
     line-height: 1.35;
   }
 
+  /* Labels are a fixed size, so around an image in a stage narrower than this they'd run off its edge. */
+  @container (max-width: 680px) {
+    .label {
+      display: none;
+    }
+  }
+
+  /* The whole image links to the project. Nothing else sits on top of it, so nothing can cover a label. */
+  .hit {
+    position: absolute;
+    inset: 0;
+  }
+
   .side {
-    flex: 1 1 320px;
+    flex: 0 0 320px;
     min-width: 0;
     padding: 28px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     gap: 24px;
+  }
+
+  /* Every project's write-up sits in the same grid cell and only the current one shows, so the panel is as
+     tall as the longest one and doesn't change height from project to project. */
+  .abouts {
+    display: grid;
+  }
+
+  .about {
+    grid-area: 1 / 1;
+    min-width: 0;
+  }
+
+  .about:not(.on) {
+    visibility: hidden;
   }
 
   .about h3 {
@@ -349,60 +474,89 @@ const fit = (s: Shot) => {
     margin-top: 16px !important;
   }
 
-  .caption {
-    margin: 0;
+  /* What the image is, then the controls. Side by side where there's room; otherwise the caption goes on
+     its own line with the controls under it, previous/next at the left and pause at the right. */
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
     padding-top: 12px;
     border-top: 1px solid var(--rule);
+  }
+
+  /* Same trick as .abouts: an invisible copy of every caption shares the cell with the real one, so a
+     caption that wraps onto a second line doesn't make the panel taller for just that image. */
+  .captions {
+    flex: 999 1 220px;
+    min-width: 0;
+    display: grid;
     font-size: 15px;
     color: var(--muted);
   }
 
-  /* The whole image links to the project; the arrows and counter sit on top of it. */
-  .hit {
-    position: absolute;
-    inset: 0;
+  .captions > * {
+    grid-area: 1 / 1;
+    margin: 0;
   }
 
-  .step {
-    position: absolute;
-    top: 50%;
-    width: 40px;
-    height: 40px;
+  .sizer {
+    visibility: hidden;
+  }
+
+  .controls {
+    flex: 1 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ctl {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
     padding: 0;
     border: 1px solid var(--ink);
     background: var(--bg);
     color: var(--ink);
     font: inherit;
-    font-size: 18px;
+    font-size: 17px;
+    line-height: 1;
     cursor: pointer;
-    transform: translateY(-50%);
   }
 
-  .step:hover {
+  .ctl:hover {
     border-color: var(--accent);
     color: var(--accent);
   }
 
-  .prev {
-    left: 12px;
-  }
-
-  .next {
-    right: 12px;
-  }
-
   .count {
-    position: absolute;
-    bottom: 12px;
-    left: 50%;
-    padding: 1px 10px;
-    border: 1px solid var(--rule);
-    background: var(--bg);
+    min-width: 52px;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 14px;
     font-variant-numeric: tabular-nums;
-    transform: translateX(-50%);
-    pointer-events: none;
+    text-align: center;
+  }
+
+  .toggle {
+    margin-left: auto;
+  }
+
+  .toggle svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* The script sets data-playing while the slideshow runs: pause shows then, play otherwise. */
+  .showcase[data-playing] .icon-play,
+  .showcase:not([data-playing]) .icon-pause {
+    display: none;
   }
 
   /* One name per project. The line over each is a progress bar while it plays. */
@@ -415,6 +569,9 @@ const fit = (s: Shot) => {
   }
 
   .tab {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
     padding: 0;
     border: none;
     background: none;
@@ -450,47 +607,68 @@ const fit = (s: Shot) => {
     transform-origin: left;
   }
 
-  @media (max-width: 900px) {
+  /* Touch screens and narrow windows: everything you can press is at least 44px tall. */
+  @media (max-width: 960px), (pointer: coarse) {
+    .ctl {
+      width: 44px;
+      height: 44px;
+    }
+
+    .read {
+      margin-top: 6px !important;
+    }
+
+    .read a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+
+    .tab {
+      min-height: 44px;
+    }
+  }
+
+  /* Any narrower and the image beside the write-up gets small, so the write-up goes underneath. The caption
+     and controls move up to sit right under the image, above the write-up. */
+  @media (max-width: 960px) {
+    .panel {
+      display: block;
+    }
+
     .stage {
       border-right: none;
       border-bottom: 1px solid var(--ink);
     }
 
-    /* Six names don't fit across a narrow screen without wrapping, so they scroll sideways. */
-    .tabs {
-      grid-auto-columns: max-content;
-      gap: 24px;
-      overflow-x: auto;
-      padding-bottom: 4px;
+    .side {
+      padding-top: 12px;
+      gap: 20px;
+    }
+
+    .bar {
+      order: -1;
+      padding-top: 0;
+      padding-bottom: 12px;
+      border-top: none;
+      border-bottom: 1px solid var(--rule);
     }
   }
 
   @media (max-width: 640px) {
     .side {
-      padding: 20px 16px;
+      padding: 12px 16px 20px;
     }
 
     .about h3 {
       font-size: 26px;
     }
 
-    /* Labels don't fit around an image this small without running off the edge. */
-    .label {
-      display: none;
-    }
-
-    .step {
-      width: 34px;
-      height: 34px;
-      font-size: 16px;
-    }
-
-    .prev {
-      left: 8px;
-    }
-
-    .next {
-      right: 8px;
+    /* Six names don't fit across a phone, so they go in two rows of three. */
+    .tabs {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px 12px;
     }
   }
 </style>
