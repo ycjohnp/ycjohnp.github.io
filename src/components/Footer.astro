@@ -1,7 +1,8 @@
 ---
 import { profile } from '../data/site';
 
-// Written out as "johnpeng {at} usc [dot] edu" and not linked, so scrapers can't pick it up.
+// The page's HTML only has "johnpeng {at} usc [dot] edu", with the two halves in data attributes, so
+// scrapers reading the HTML don't find an address. The script below turns it into a real mailto link.
 const [user, domain] = profile.email.split('@');
 const email = `${user} {at} ${domain.replaceAll('.', ' [dot] ')}`;
 ---
@@ -9,11 +10,21 @@ const email = `${user} {at} ${domain.replaceAll('.', ' [dot] ')}`;
 <footer id="contact" class="site-footer">
   <h2>Say hello</h2>
   <p class="big">
-    Email is the best way to reach me: {email}.{' '}
+    Email is the best way to reach me: <span class="email" data-user={user} data-domain={domain}>{email}</span>.{' '}
     I'm also on <a href={profile.links.github}>GitHub</a> and <a href={profile.links.linkedin}>LinkedIn</a>.
   </p>
   <p class="copyright">© {new Date().getFullYear()} John Peng</p>
 </footer>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.email[data-user]').forEach((el) => {
+    const address = `${el.dataset.user}@${el.dataset.domain}`;
+    const link = document.createElement('a');
+    link.href = `mailto:${address}`;
+    link.textContent = address;
+    el.replaceWith(link);
+  });
+</script>
 
 <style>
   .site-footer {

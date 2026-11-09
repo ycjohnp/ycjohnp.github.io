@@ -119,6 +119,10 @@ const rest = await Promise.all(
         Right now I'm co-leading <a href={url('/projects/tether/')}>Tether</a> at Terra Labs, a 7-DOF inchworm robot made of
         three wireless modules. This past summer I interned on SRAM's Advanced Development team in Chicago.
       </p>
+      <p class="big">
+        I'm looking for a Summer 2027 internship in robotics, embedded systems or hardware. Here's my{' '}
+        <a href={url('/resume/')}>resume</a>, and <a href="#contact">email</a> is the best way to reach me.
+      </p>
       <dl class="facts">
         <div>
           <dt>Studying</dt>
@@ -127,10 +131,6 @@ const rest = await Promise.all(
         <div>
           <dt>Based in</dt>
           <dd>{profile.location.replace(', CA', '')}</dd>
-        </div>
-        <div>
-          <dt>Looking for</dt>
-          <dd>A Summer 2027 internship in robotics, embedded systems or hardware</dd>
         </div>
         <div>
           <dt>Elsewhere</dt>
@@ -279,10 +279,112 @@ const rest = await Promise.all(
     color: var(--body);
   }
 
-  @media (max-width: 640px) {
+  .section-head a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  /* Narrow windows and tablets: shrink both columns so the portrait stays beside the text. */
+  @media (min-width: 721px) and (max-width: 900px) {
     .intro {
-      gap: 32px;
-      padding: 40px 0 56px;
+      gap: 40px;
+    }
+
+    .portrait {
+      flex-basis: 220px;
+    }
+
+    .intro-text {
+      flex-basis: 360px;
+    }
+  }
+
+  /* Phones: a small portrait beside the heading, then the text at full width, so the projects aren't two
+     screens down. display: contents lifts the heading and paragraphs into the grid next to the portrait. */
+  @media (max-width: 720px) {
+    .intro {
+      display: grid;
+      grid-template-columns: 104px minmax(0, 1fr);
+      gap: 0 20px;
+      align-items: center;
+      padding: 32px 0 56px;
+    }
+
+    .portrait {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .intro-text {
+      display: contents;
+    }
+
+    .intro-text > * {
+      grid-column: 1 / -1;
+    }
+
+    .intro-text > h1 {
+      grid-column: 2;
+      grid-row: 1;
+      margin: 0;
+    }
+
+    .intro-text > h1 + .big {
+      margin-top: 28px;
+    }
+
+    .intro-text > .big {
+      font-size: 18px;
+    }
+  }
+
+  /* Phones: each job becomes two lines, the place and dates on the first and the role under them, in place
+     of a table that's wider than the screen. */
+  @media (max-width: 640px) {
+    .work,
+    .work tbody {
+      display: block;
+      min-width: 0;
+    }
+
+    .work thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+
+    .work tbody {
+      border-top: 1.5px solid var(--ink);
+    }
+
+    .work tr {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 2px 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .work td {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      padding: 0;
+      border: none;
+    }
+
+    .work .org {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .work .when {
+      grid-column: 2;
+      grid-row: 1;
+      font-size: 15px;
+      color: var(--muted);
     }
   }
 

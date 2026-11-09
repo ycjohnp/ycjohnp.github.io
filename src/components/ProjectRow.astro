@@ -14,7 +14,16 @@ const { title, tagline, summary, context, cover, coverAlt } = project.data;
 <a class="row" href={url(`/projects/${project.id}/`)}>
   {
     cover ? (
-      <Image class="thumb" src={cover} alt={coverAlt ?? ''} width={336} height={224} />
+      <Image
+        class="thumb"
+        src={cover}
+        alt={coverAlt ?? ''}
+        width={336}
+        height={224}
+        fit="cover"
+        widths={[336, 720, 1080]}
+        sizes="(max-width: 640px) 100vw, 168px"
+      />
     ) : (
       <div class="thumb placeholder">Photo</div>
     )
@@ -93,5 +102,19 @@ const { title, tagline, summary, context, cover, coverAlt } = project.data;
     flex: 1 1 160px;
     font-size: 15px;
     color: var(--muted);
+  }
+
+  /* Phones: the photo runs the full width, where a small one would leave a blank strip beside it. */
+  @media (max-width: 640px) {
+    .row {
+      gap: 12px;
+    }
+
+    .thumb {
+      flex-basis: 100%;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 3 / 2;
+    }
   }
 </style>

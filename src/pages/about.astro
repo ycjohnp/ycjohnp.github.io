@@ -271,7 +271,9 @@ const listWords = (items: string[][]) =>
     font-size: 13px;
   }
 
+  /* Capped so the longer entries don't run the full page width as one very long line. */
   .timeline {
+    max-width: 820px;
     border-top: 1.5px solid var(--ink);
   }
 

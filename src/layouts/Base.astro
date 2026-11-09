@@ -66,9 +66,10 @@ const cardUrl = Astro.site ? new URL(card.src, Astro.site).href : card.src;
     </script>
   </head>
   <body>
+    <a class="skip" href="#main">Skip to content</a>
     <div class="wrap">
       <Header current={current} />
-      <main>
+      <main id="main" tabindex="-1">
         <slot />
       </main>
       <Footer />
